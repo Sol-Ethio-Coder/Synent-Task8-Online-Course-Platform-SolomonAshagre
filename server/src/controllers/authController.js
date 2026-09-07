@@ -25,12 +25,15 @@ const register = asyncHandler(async (req, res) => {
   await user.save();
 
   const verifyLink = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
-  await sendEmail({
+  // Intentionally not awaited: sendEmail() already catches and logs its own
+  // errors, so a slow or blocked SMTP connection (e.g. Render's free-tier
+  // SMTP port block) never delays this response to the user.
+  sendEmail({
     to: user.email,
     subject: 'Verify your STCA account',
     html: emailTemplates.verifyEmail(user.name, verifyLink)
   });
-  await sendEmail({
+  sendEmail({
     to: user.email,
     subject: 'Welcome to Sol Tutoring And Coding Academy',
     html: emailTemplates.registrationWelcome(user.name)
@@ -101,7 +104,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   await user.save();
 
   const resetLink = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
-  await sendEmail({
+  sendEmail({
     to: user.email,
     subject: 'Reset your STCA password',
     html: emailTemplates.resetPassword(user.name, resetLink)

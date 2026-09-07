@@ -29,6 +29,12 @@ async function connectDB() {
 
 const app = express();
 
+// Render (and most PaaS hosts) sit in front of the app as a reverse proxy.
+// Without this, express-rate-limit can't safely trust X-Forwarded-For to
+// identify individual clients, which throws the ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+// warning and can misidentify everyone as the same client.
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));

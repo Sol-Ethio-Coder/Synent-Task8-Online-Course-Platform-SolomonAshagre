@@ -7,7 +7,14 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  // Nodemailer's defaults can hang for minutes if the SMTP port is silently
+  // dropped by a host firewall (e.g. Render's free-tier SMTP block). These
+  // callers no longer block the response either way, but a fast failure
+  // still means less time wasted per attempt and cleaner logs.
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 /**

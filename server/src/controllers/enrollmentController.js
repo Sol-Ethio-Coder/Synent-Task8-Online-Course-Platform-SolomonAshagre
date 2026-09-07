@@ -172,8 +172,11 @@ async function addCourseToUser(userId, courseId) {
   }
 }
 
-async function notifyEnrollment(user, course) {
-  await sendEmail({
+function notifyEnrollment(user, course) {
+  // Fire-and-forget: this is awaited from the Chapa webhook and the
+  // return_url verify endpoint — both should respond quickly regardless of
+  // SMTP being slow or unreachable (e.g. Render's free-tier SMTP port block).
+  sendEmail({
     to: user.email,
     subject: `You're enrolled in ${course.title}`,
     html: emailTemplates.enrollmentConfirmation(user.name, course.title)
