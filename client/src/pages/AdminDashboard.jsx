@@ -3,25 +3,31 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 
-const TABS = ['Courses', 'Users', 'Enrollments'];
+const TABS = ['Courses', 'Users', 'Enrollments', 'Tutoring Photos'];
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('Courses');
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
+  const [images, setImages] = useState([]);
+  const [imageForm, setImageForm] = useState({ url: '', caption: '' });
+  const [addingImage, setAddingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, u, e] = await Promise.all([
+    const [c, u, e, img] = await Promise.all([
       api.get('/admin/courses'),
       api.get('/admin/users'),
-      api.get('/admin/enrollments')
+      api.get('/admin/enrollments'),
+      api.get('/tutoring/images')
     ]);
     setCourses(c.data);
     setUsers(u.data);
     setEnrollments(e.data);
+    setImages(img.data);
     setLoading(false);
   };
 
@@ -33,6 +39,31 @@ export default function AdminDashboard() {
     if (!confirm('Delete this course? This cannot be undone.')) return;
     await api.delete(`/admin/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c._id !== id));
+  };
+
+  const handleAddImage = async (e) => {
+    e.preventDefault();
+    setImageError('');
+    if (!imageForm.url.trim()) {
+      setImageError('Image URL is required');
+      return;
+    }
+    setAddingImage(true);
+    try {
+      const { data } = await api.post('/admin/tutoring-images', imageForm);
+      setImages((prev) => [data, ...prev]);
+      setImageForm({ url: '', caption: '' });
+    } catch (err) {
+      setImageError(err.response?.data?.message || 'Could not add image');
+    } finally {
+      setAddingImage(false);
+    }
+  };
+
+  const handleDeleteImage = async (id) => {
+    if (!confirm('Remove this photo from the tutoring page?')) return;
+    await api.delete(`/admin/tutoring-images/${id}`);
+    setImages((prev) => prev.filter((img) => img._id !== id));
   };
 
   return (
@@ -154,6 +185,66 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {tab === 'Tutoring Photos' && (
+            <div>
+              <form onSubmit={handleAddImage} className="bg-white border border-forest-100 rounded-2xl p-5 mb-6">
+                <h3 className="font-display font-semibold text-ink mb-3">Add a photo</h3>
+                <div className="grid sm:grid-cols-[2fr_2fr_auto] gap-3 items-start">
+                  <div>
+                    <input
+                      type="url"
+                      required
+                      placeholder="Image URL (e.g. from Imgur, Google Drive share link, etc.)"
+                      value={imageForm.url}
+                      onChange={(e) => setImageForm({ ...imageForm, url: e.target.value })}
+                      className="w-full border border-forest-100 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Caption (optional)"
+                      value={imageForm.caption}
+                      onChange={(e) => setImageForm({ ...imageForm, caption: e.target.value })}
+                      className="w-full border border-forest-100 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={addingImage}
+                    className="bg-forest-700 text-white px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60 whitespace-nowrap"
+                  >
+                    {addingImage ? 'Adding...' : 'Add photo'}
+                  </button>
+                </div>
+                {imageError && <p className="text-sm text-red-600 mt-2">{imageError}</p>}
+                <p className="text-xs text-ink/40 mt-2">
+                  Paste a direct image link. This platform doesn't host file uploads yet — use an image hosting service and paste its link here.
+                </p>
+              </form>
+
+              {images.length === 0 ? (
+                <p className="text-ink/40 text-sm">No photos added yet.</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  {images.map((img) => (
+                    <div key={img._id} className="bg-white border border-forest-100 rounded-xl overflow-hidden">
+                      <img src={img.url} alt={img.caption || 'Tutoring'} className="w-full h-32 object-cover" />
+                      <div className="p-2.5">
+                        <p className="text-xs text-ink/60 truncate">{img.caption || '—'}</p>
+                        <button
+                          onClick={() => handleDeleteImage(img._id)}
+                          className="text-xs text-red-600 hover:underline mt-1"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </motion.div>

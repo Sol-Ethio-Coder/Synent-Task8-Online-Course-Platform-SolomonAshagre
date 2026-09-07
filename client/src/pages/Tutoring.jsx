@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import api from '../api/axios.js';
 
 const offerings = [
   {
@@ -18,6 +19,12 @@ const offerings = [
 ];
 
 export default function Tutoring() {
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    api.get('/tutoring/images').then((res) => setImages(res.data)).catch(() => setImages([]));
+  }, []);
+
   return (
     <div className="max-w-5xl mx-auto px-5 py-16">
       <motion.h1
@@ -46,6 +53,27 @@ export default function Tutoring() {
           </motion.div>
         ))}
       </div>
+
+      {images.length > 0 && (
+        <div className="mt-14">
+          <h2 className="font-display font-semibold text-xl text-ink mb-5">Moments from our sessions</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {images.map((img, i) => (
+              <motion.figure
+                key={img._id}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+                className="rounded-2xl overflow-hidden border border-forest-100 bg-white"
+              >
+                <img src={img.url} alt={img.caption || 'STCA tutoring'} className="w-full h-48 object-cover" />
+                {img.caption && <figcaption className="text-xs text-ink/60 px-3 py-2">{img.caption}</figcaption>}
+              </motion.figure>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-14 bg-forest-700 text-white rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>

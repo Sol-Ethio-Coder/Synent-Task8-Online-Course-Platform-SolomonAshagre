@@ -7,6 +7,7 @@ const {
   getAllCoursesAdmin
 } = require('../controllers/courseController');
 const { getAllUsers, getAllEnrollments } = require('../controllers/adminController');
+const { addTutoringImage, deleteTutoringImage } = require('../controllers/tutoringController');
 
 const router = express.Router();
 
@@ -19,5 +20,8 @@ router.delete('/courses/:id', deleteCourse);
 
 router.get('/users', getAllUsers);
 router.get('/enrollments', getAllEnrollments);
+
+router.post('/tutoring-images', addTutoringImage);
+router.delete('/tutoring-images/:id', deleteTutoringImage);
 
 module.exports = router;
