@@ -31,6 +31,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-7">
           <NavLink to="/courses" className={navLinkClass}>Courses</NavLink>
           <NavLink to="/tutoring" className={navLinkClass}>Tutoring</NavLink>
+          <NavLink to="/about" className={navLinkClass}>About</NavLink>
           {user && <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>}
           {user?.role === 'admin' && <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>}
         </div>
@@ -79,6 +80,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-4 px-5 py-5">
               <NavLink to="/courses" className={navLinkClass} onClick={() => setOpen(false)}>Courses</NavLink>
               <NavLink to="/tutoring" className={navLinkClass} onClick={() => setOpen(false)}>Tutoring</NavLink>
+              <NavLink to="/about" className={navLinkClass} onClick={() => setOpen(false)}>About</NavLink>
               {user && <NavLink to="/dashboard" className={navLinkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>}
               {user?.role === 'admin' && <NavLink to="/admin" className={navLinkClass} onClick={() => setOpen(false)}>Admin</NavLink>}
               {user ? (

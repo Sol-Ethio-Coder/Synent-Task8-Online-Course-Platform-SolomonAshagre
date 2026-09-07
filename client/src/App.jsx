@@ -8,6 +8,7 @@ import Home from './pages/Home.jsx';
 import Courses from './pages/Courses.jsx';
 import CourseDetails from './pages/CourseDetails.jsx';
 import Tutoring from './pages/Tutoring.jsx';
+import About from './pages/About.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:slug" element={<CourseDetails />} />
           <Route path="/tutoring" element={<Tutoring />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
