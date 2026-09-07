@@ -21,7 +21,10 @@ export default function Navbar() {
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-5 py-4">
         <Link to="/" className="flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-forest-700 text-sun-400 flex items-center justify-center font-display font-bold">S</span>
-          <span className="font-display font-semibold text-lg text-forest-700">STCA</span>
+          <span className="leading-none">
+            <span className="block font-display font-semibold text-lg text-forest-700">STCA</span>
+            <span className="hidden sm:block text-[9px] tracking-widest text-ink/40 uppercase mt-0.5">Practice makes you perfect</span>
+          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-7">

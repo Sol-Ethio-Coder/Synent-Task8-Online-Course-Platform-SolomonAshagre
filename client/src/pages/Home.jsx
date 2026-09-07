@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ChatWidget from '../components/ChatWidget.jsx';
+import api from '../api/axios.js';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -12,7 +13,20 @@ const fadeUp = {
   })
 };
 
+const pathways = [
+  { title: 'Primary Computing', text: 'First steps with algorithms & Scratch' },
+  { title: 'IGCSE Computer Science (0478)', text: 'Full syllabus & Python' },
+  { title: 'A-Level', text: 'Data structures, OOP & computational thinking' },
+  { title: 'Modern Web Development', text: 'HTML, CSS, JavaScript & React' }
+];
+
 export default function Home() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    api.get('/stats').then((res) => setStats(res.data)).catch(() => setStats(null));
+  }, []);
+
   return (
     <div>
       <section className="max-w-6xl mx-auto px-5 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center">
@@ -55,6 +69,24 @@ export default function Home() {
               Explore tutoring
             </Link>
           </motion.div>
+
+          <motion.div
+            variants={fadeUp} initial="hidden" animate="show" custom={4}
+            className="mt-10 flex gap-8"
+          >
+            <div>
+              <p className="text-2xl font-display font-semibold text-forest-700">{stats ? `${stats.courseTracks}+` : '—'}</p>
+              <p className="text-xs text-ink/50">Course tracks</p>
+            </div>
+            <div>
+              <p className="text-2xl font-display font-semibold text-forest-700">{stats ? `${stats.totalLessons}+` : '—'}</p>
+              <p className="text-xs text-ink/50">Lessons</p>
+            </div>
+            <div>
+              <p className="text-2xl font-display font-semibold text-forest-700">100%</p>
+              <p className="text-xs text-ink/50">Practical focus</p>
+            </div>
+          </motion.div>
         </div>
 
         <motion.div
@@ -83,6 +115,49 @@ export default function Home() {
             </div>
           </div>
         </motion.div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-5 pb-20">
+        <div className="grid md:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="bg-white border border-forest-100 rounded-2xl p-8"
+          >
+            <h2 className="font-display font-semibold text-xl text-ink mb-5">Pathways we cover</h2>
+            <ul className="space-y-4">
+              {pathways.map((p) => (
+                <li key={p.title} className="flex gap-2.5">
+                  <span className="text-forest-600 mt-0.5">▷</span>
+                  <span className="text-sm text-ink/75">
+                    <strong className="text-ink">{p.title}</strong> — {p.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-forest-700 text-white rounded-2xl p-8 flex flex-col justify-center"
+          >
+            <p className="font-display font-semibold text-2xl">"Practice makes you perfect!"</p>
+            <p className="text-white/70 text-sm mt-3 leading-relaxed">
+              Join a community of curious learners and start building real skills today.
+            </p>
+            <Link
+              to="/register"
+              className="inline-block mt-6 bg-sun-400 text-forest-700 px-6 py-3 rounded-full font-medium w-fit hover:bg-sun-500 transition-colors"
+            >
+              Get started free
+            </Link>
+          </motion.div>
+        </div>
       </section>
 
       <section className="bg-forest-50 py-20">
