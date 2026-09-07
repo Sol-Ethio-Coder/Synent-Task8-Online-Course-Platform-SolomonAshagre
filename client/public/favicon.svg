@@ -1,6 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="20" fill="#1F4B3F"/>
-  <text x="50" y="47" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#F2B441" text-anchor="middle">S</text>
-  <path d="M20 66 L50 80 L80 66 L50 52 Z" fill="#F2B441"/>
-  <path d="M20 66 V78" stroke="#F2B441" stroke-width="3" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="stcaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#F43F5E"/>
+    </linearGradient>
+    <filter id="stcaGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="100" height="100" rx="18" fill="#05070D"/>
+
+  <g stroke="url(#stcaGradient)" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.85">
+    <path d="M22 28 L12 28 L12 18"/>
+    <circle cx="12" cy="18" r="2.2" fill="url(#stcaGradient)"/>
+    <circle cx="8" cy="28" r="1.6" fill="url(#stcaGradient)"/>
+    <path d="M78 28 L88 28 L88 18"/>
+    <circle cx="88" cy="18" r="2.2" fill="url(#stcaGradient)"/>
+    <circle cx="92" cy="28" r="1.6" fill="url(#stcaGradient)"/>
+  </g>
+
+  <g filter="url(#stcaGlow)">
+    <path
+      d="M50 12 L80 22 L80 46 C80 66 68 80 50 90 C32 80 20 66 20 46 L20 22 Z"
+      fill="#05070D"
+      stroke="url(#stcaGradient)"
+      stroke-width="3.6"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <text x="50" y="38" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="20" fill="#FFFFFF">S</text>
+
+  <g stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M36 50 C33 48.5 30 48 27.5 48.5 L27.5 65 C30 64.5 33 65 36 66.5 Z"/>
+    <path d="M36 50 L36 66.5"/>
+  </g>
+  <text x="63" y="63" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="13" fill="#FFFFFF">&lt;/&gt;</text>
 </svg>

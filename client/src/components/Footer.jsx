@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Logo from './Logo.jsx';
 
 const MARKETING_SITE = 'https://stca-academy.netlify.app/';
 
@@ -9,13 +10,20 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-5 py-14 grid gap-10 md:grid-cols-4">
         <div>
           <a href={MARKETING_SITE} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mb-3 w-fit">
-            <span className="w-8 h-8 rounded-lg bg-sun-400 text-forest-700 flex items-center justify-center font-display font-bold">S</span>
+            <span className="w-8 h-8 flex items-center justify-center">
+              <Logo size={32} animated={false} />
+            </span>
             <span className="font-display font-semibold text-lg text-white">STCA</span>
           </a>
           <p className="text-sm leading-relaxed">
             Sol Tutoring And Coding Academy — coding classes and academic tutoring, online and offline, for learners of every level.
           </p>
-          <a href={MARKETING_SITE} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-sun-400 hover:underline mt-4">
+          <a
+            href={MARKETING_SITE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-sun-400 hover:underline mt-4"
+          >
             Visit our main site ↗
           </a>
         </div>
@@ -52,7 +60,7 @@ export default function Footer() {
           <span>
             Built by{' '}
             <a href="https://sol-ethio-coder.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-sun-400 hover:underline">
-              Sol Ethio Coder
+              Solomon Ashagre
             </a>
           </span>
         </div>

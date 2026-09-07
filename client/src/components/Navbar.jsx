@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext.jsx';
+import Logo from './Logo.jsx';
 
 const navLinkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${isActive ? 'text-forest-700' : 'text-ink/70 hover:text-forest-700'}`;
@@ -20,7 +21,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-[#FBF9F4]/90 backdrop-blur border-b border-forest-100">
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-5 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-lg bg-forest-700 text-sun-400 flex items-center justify-center font-display font-bold">S</span>
+          <Logo size={36} />
           <span className="leading-none">
             <span className="block font-display font-semibold text-lg text-forest-700">STCA</span>
             <span className="hidden sm:block text-[9px] tracking-widest text-ink/40 uppercase mt-0.5">Practice makes you perfect</span>
