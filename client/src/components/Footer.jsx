@@ -15,12 +15,7 @@ export default function Footer() {
           <p className="text-sm leading-relaxed">
             Sol Tutoring And Coding Academy — coding classes and academic tutoring, online and offline, for learners of every level.
           </p>
-          <a
-            href={MARKETING_SITE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-sun-400 hover:underline mt-4"
-          >
+          <a href={MARKETING_SITE} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-sun-400 hover:underline mt-4">
             Visit our main site ↗
           </a>
         </div>
@@ -39,8 +34,6 @@ export default function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/policy" className="hover:text-sun-400">Privacy Policy</Link></li>
             <li><Link to="/terms" className="hover:text-sun-400">Terms of Service</Link></li>
-            <li><a href="https://t.me/Sol_Ethio_Coder" target="_blank" rel="noopener noreferrer" className="hover:text-sun-400">Telegram</a></li>
-            <li><a href="https://www.youtube.com/@stcaAcademy" target="_blank" rel="noopener noreferrer" className="hover:text-sun-400">YouTube</a></li>
           </ul>
         </div>
 
@@ -48,7 +41,6 @@ export default function Footer() {
           <h4 className="text-white font-medium mb-3 text-sm">Contact</h4>
           <ul className="space-y-2 text-sm">
             <li><a href="mailto:solash5156@gmail.com" className="hover:text-sun-400">solash5156@gmail.com</a></li>
-            <li><a href="tel:+251901436358" className="hover:text-sun-400">(+251) 901 436 358</a></li>
             <li>Addis Ababa, Ethiopia</li>
           </ul>
         </div>
