@@ -60,7 +60,7 @@ export default function Footer() {
           <span>
             Built by{' '}
             <a href="https://sol-ethio-coder.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-sun-400 hover:underline">
-              Solomon Ashagre
+              Sol Ethio Coder
             </a>
           </span>
         </div>
