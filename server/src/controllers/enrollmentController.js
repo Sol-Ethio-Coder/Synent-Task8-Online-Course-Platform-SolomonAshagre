@@ -57,6 +57,15 @@ const createOrder = asyncHandler(async (req, res) => {
   const txRef = generateTxRef(courseId);
   const [firstName, ...rest] = req.user.name.split(' ');
 
+  // If either is missing, callback_url/return_url below silently become
+  // "undefined/..." — an invalid URL that Chapa rejects. Fail fast with a
+  // clear message instead of a confusing 502 from Chapa's side.
+  if (!process.env.CLIENT_URL || !process.env.SERVER_URL) {
+    console.error('Missing CLIENT_URL or SERVER_URL env var — cannot build Chapa callback/return URLs.');
+    res.status(500);
+    throw new Error('Server is misconfigured (missing CLIENT_URL/SERVER_URL). Contact support.');
+  }
+
   const payload = {
     amount: String(course.price),
     currency: 'ETB',
@@ -79,9 +88,16 @@ const createOrder = asyncHandler(async (req, res) => {
     });
     checkoutUrl = data.data.checkout_url;
   } catch (err) {
+    const chapaMessage = err.response?.data?.message;
     console.error('Chapa initialize failed:', err.response?.data || err.message);
     res.status(502);
-    throw new Error('Could not start payment with Chapa. Please try again.');
+    // Surface Chapa's actual reason when available (e.g. "invalid callback_url",
+    // "unsupported currency") instead of a generic message that hides it.
+    throw new Error(
+      chapaMessage
+        ? `Could not start payment with Chapa: ${chapaMessage}`
+        : 'Could not start payment with Chapa. Please try again.'
+    );
   }
 
   await Enrollment.findOneAndUpdate(
