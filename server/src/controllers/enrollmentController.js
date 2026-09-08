@@ -20,8 +20,19 @@ function chapaHeaders() {
   };
 }
 
-function generateTxRef(courseId) {
-  return `stca-${courseId}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+function generateTxRef() {
+  // Chapa caps tx_ref at 50 chars. The old format embedded the full 24-char
+  // Mongo ObjectId + a full millisecond timestamp + hex bytes and landed
+  // around 52 chars — over the limit. A base36 timestamp + 12 hex chars is
+  // still effectively collision-proof for this purpose, at ~26 chars total.
+  return `stca-${Date.now().toString(36)}-${crypto.randomBytes(6).toString('hex')}`;
+}
+
+// Chapa restricts customization.title/description to letters, numbers,
+// hyphens, underscores, spaces, and dots — strip anything else (colons,
+// parentheses, etc.) rather than let Chapa reject the whole request.
+function sanitizeChapaText(str) {
+  return str.replace(/[^a-zA-Z0-9\-_.\s]/g, '').trim();
 }
 
 // @route POST /api/enrollments/order
@@ -54,7 +65,7 @@ const createOrder = asyncHandler(async (req, res) => {
     return res.json({ free: true });
   }
 
-  const txRef = generateTxRef(courseId);
+  const txRef = generateTxRef();
   const [firstName, ...rest] = req.user.name.split(' ');
 
   // If either is missing, callback_url/return_url below silently become
@@ -77,7 +88,7 @@ const createOrder = asyncHandler(async (req, res) => {
     return_url: `${process.env.CLIENT_URL}/payment/callback?tx_ref=${txRef}`,
     customization: {
       title: 'STCA Enrollment',
-      description: `Enrollment: ${course.title}`.slice(0, 60) // Chapa caps this field's length
+      description: sanitizeChapaText(`Enrollment for ${course.title}`).slice(0, 60)
     }
   };
 
