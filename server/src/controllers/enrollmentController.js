@@ -91,12 +91,16 @@ const createOrder = asyncHandler(async (req, res) => {
     const chapaMessage = err.response?.data?.message;
     console.error('Chapa initialize failed:', err.response?.data || err.message);
     res.status(502);
-    // Surface Chapa's actual reason when available (e.g. "invalid callback_url",
-    // "unsupported currency") instead of a generic message that hides it.
+    // Chapa returns a plain string for simple errors, but a nested object
+    // (e.g. { email: [...], callback_url: [...] }) for field-level validation
+    // errors — stringify it properly instead of letting JS turn it into
+    // the useless literal text "[object Object]".
+    let detail = '';
+    if (chapaMessage) {
+      detail = typeof chapaMessage === 'string' ? chapaMessage : JSON.stringify(chapaMessage);
+    }
     throw new Error(
-      chapaMessage
-        ? `Could not start payment with Chapa: ${chapaMessage}`
-        : 'Could not start payment with Chapa. Please try again.'
+      detail ? `Could not start payment with Chapa: ${detail}` : 'Could not start payment with Chapa. Please try again.'
     );
   }
 
