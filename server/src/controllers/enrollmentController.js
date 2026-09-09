@@ -186,6 +186,69 @@ const verifyByTxRef = asyncHandler(async (req, res) => {
   });
 });
 
+// @route POST /api/enrollments/manual
+// Body: { courseId, receiptImage } — receiptImage is a base64 data URI from
+// the frontend (FileReader). Creates a pending enrollment for admin review;
+// does NOT add the course to the user's dashboard until an admin approves it.
+const submitManualPayment = asyncHandler(async (req, res) => {
+  const { courseId, receiptImage } = req.body;
+
+  if (!receiptImage) {
+    res.status(400);
+    throw new Error('A receipt screenshot is required');
+  }
+  // Rough sanity cap so someone can't post a huge payload — express.json's
+  // own limit (see app.js) is the real backstop, this is just a clean error.
+  if (receiptImage.length > 8 * 1024 * 1024) {
+    res.status(400);
+    throw new Error('Receipt image is too large. Please upload a smaller screenshot.');
+  }
+
+  const course = await Course.findById(courseId);
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  const existingPaid = await Enrollment.findOne({ user: req.user._id, course: courseId, status: 'paid' });
+  if (existingPaid) {
+    res.status(400);
+    throw new Error('You are already enrolled in this course');
+  }
+
+  const enrollment = await Enrollment.findOneAndUpdate(
+    { user: req.user._id, course: courseId },
+    {
+      amountPaid: course.price,
+      currency: 'ETB',
+      paymentMethod: 'manual',
+      receiptImage,
+      status: 'pending_review',
+      reviewedBy: undefined,
+      reviewedAt: undefined,
+      rejectionReason: undefined
+    },
+    { upsert: true, new: true }
+  );
+
+  res.status(201).json({
+    message: 'Receipt submitted. We\'ll review it and activate your course shortly.',
+    status: enrollment.status
+  });
+});
+
+// @route GET /api/enrollments/my-pending
+// Lets the student's dashboard show "payment under review" for manual
+// submissions that haven't been approved yet.
+const getMyPendingEnrollments = asyncHandler(async (req, res) => {
+  const pending = await Enrollment.find({
+    user: req.user._id,
+    status: { $in: ['pending_review', 'rejected'] }
+  }).populate('course', 'title price');
+  res.json(pending);
+});
+
+
 // @route GET /api/enrollments/my-courses
 const getMyCourses = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('enrolledCourses.course');
@@ -214,4 +277,11 @@ function notifyEnrollment(user, course) {
   });
 }
 
-module.exports = { createOrder, chapaWebhook, verifyByTxRef, getMyCourses };
+module.exports = {
+  createOrder,
+  chapaWebhook,
+  verifyByTxRef,
+  getMyCourses,
+  submitManualPayment,
+  getMyPendingEnrollments
+};

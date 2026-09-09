@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import ManualPaymentModal from '../components/ManualPaymentModal.jsx';
 
 export default function CourseDetails() {
   const { slug } = useParams();
@@ -11,12 +12,14 @@ export default function CourseDetails() {
   const [course, setCourse] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [error, setError] = useState('');
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [submittedForReview, setSubmittedForReview] = useState(false);
 
   useEffect(() => {
     api.get(`/courses/${slug}`).then((res) => setCourse(res.data)).catch(() => setError('Course not found'));
   }, [slug]);
 
-  const handleEnroll = async () => {
+  const handleChapaEnroll = async () => {
     if (!user) {
       navigate('/login');
       return;
@@ -38,6 +41,14 @@ export default function CourseDetails() {
       setError(err.response?.data?.message || 'Could not start enrollment. Please try again.');
       setEnrolling(false);
     }
+  };
+
+  const handleManualClick = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setShowManualModal(true);
   };
 
   if (error && !course) {
@@ -91,15 +102,52 @@ export default function CourseDetails() {
 
         {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
-        <button
-          onClick={handleEnroll}
-          disabled={enrolling}
-          className="w-full mt-6 bg-forest-700 text-white py-3 rounded-full font-medium hover:bg-forest-600 transition-colors disabled:opacity-60"
-        >
-          {enrolling ? 'Redirecting to checkout...' : 'Enroll Now'}
-        </button>
-        <p className="text-xs text-ink/40 mt-3 text-center">Pay securely via Chapa — Telebirr, CBE Birr, HelloCash, or card</p>
+        {submittedForReview ? (
+          <div className="mt-6 bg-forest-50 border border-forest-100 rounded-xl p-4 text-center">
+            <p className="text-sm text-forest-700 font-medium">Receipt submitted ✓</p>
+            <p className="text-xs text-ink/50 mt-1">We'll review it and activate your course shortly.</p>
+          </div>
+        ) : course.isFree || course.price === 0 ? (
+          <button
+            onClick={handleChapaEnroll}
+            disabled={enrolling}
+            className="w-full mt-6 bg-forest-700 text-white py-3 rounded-full font-medium hover:bg-forest-600 transition-colors disabled:opacity-60"
+          >
+            {enrolling ? 'Enrolling...' : 'Enroll Now'}
+          </button>
+        ) : (
+          <div className="mt-6 space-y-2.5">
+            <button
+              onClick={handleChapaEnroll}
+              disabled={enrolling}
+              className="w-full bg-forest-700 text-white py-3 rounded-full font-medium hover:bg-forest-600 transition-colors disabled:opacity-60"
+            >
+              {enrolling ? 'Redirecting to checkout...' : 'Pay with Chapa'}
+            </button>
+            <button
+              onClick={handleManualClick}
+              className="w-full border border-forest-700 text-forest-700 py-3 rounded-full font-medium hover:bg-forest-50 transition-colors"
+            >
+              Pay via bank / mobile transfer
+            </button>
+          </div>
+        )}
+
+        <p className="text-xs text-ink/40 mt-3 text-center">
+          Chapa: Telebirr, CBE Birr, HelloCash, or card. Or transfer directly and upload your receipt.
+        </p>
       </motion.div>
+
+      {showManualModal && (
+        <ManualPaymentModal
+          course={course}
+          onClose={() => setShowManualModal(false)}
+          onSubmitted={() => {
+            setShowManualModal(false);
+            setSubmittedForReview(true);
+          }}
+        />
+      )}
     </div>
   );
 }

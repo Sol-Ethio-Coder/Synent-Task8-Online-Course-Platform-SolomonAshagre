@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 
-const TABS = ['Courses', 'Users', 'Enrollments', 'Tutoring Photos'];
+const BASE_TABS = ['Courses', 'Users', 'Enrollments', 'Tutoring Photos'];
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('Courses');
@@ -11,23 +11,27 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [images, setImages] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
   const [imageForm, setImageForm] = useState({ url: '', caption: '' });
   const [addingImage, setAddingImage] = useState(false);
   const [imageError, setImageError] = useState('');
+  const [reviewingId, setReviewingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, u, e, img] = await Promise.all([
+    const [c, u, e, img, pending] = await Promise.all([
       api.get('/admin/courses'),
       api.get('/admin/users'),
       api.get('/admin/enrollments'),
-      api.get('/tutoring/images')
+      api.get('/tutoring/images'),
+      api.get('/admin/pending-enrollments')
     ]);
     setCourses(c.data);
     setUsers(u.data);
     setEnrollments(e.data);
     setImages(img.data);
+    setPendingPayments(pending.data);
     setLoading(false);
   };
 
@@ -66,6 +70,32 @@ export default function AdminDashboard() {
     setImages((prev) => prev.filter((img) => img._id !== id));
   };
 
+  const handleApprove = async (id) => {
+    setReviewingId(id);
+    try {
+      await api.post(`/admin/enrollments/${id}/approve`);
+      setPendingPayments((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not approve this enrollment.');
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    const reason = prompt('Reason for rejecting this receipt (shown to the student):', 'Receipt could not be verified.');
+    if (reason === null) return; // cancelled
+    setReviewingId(id);
+    try {
+      await api.post(`/admin/enrollments/${id}/reject`, { reason });
+      setPendingPayments((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not reject this enrollment.');
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-5 py-14">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -75,16 +105,21 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <div className="flex gap-2 mt-8 border-b border-forest-100">
-        {TABS.map((t) => (
+      <div className="flex gap-2 mt-8 border-b border-forest-100 overflow-x-auto">
+        {[...BASE_TABS, 'Pending Payments'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               tab === t ? 'border-forest-700 text-forest-700' : 'border-transparent text-ink/50 hover:text-ink/80'
             }`}
           >
             {t}
+            {t === 'Pending Payments' && pendingPayments.length > 0 && (
+              <span className="ml-1.5 bg-amber-400 text-forest-900 text-xs px-1.5 py-0.5 rounded-full">
+                {pendingPayments.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -165,6 +200,7 @@ export default function AdminDashboard() {
                     <th className="py-3 pr-4">User</th>
                     <th className="py-3 pr-4">Course</th>
                     <th className="py-3 pr-4">Amount</th>
+                    <th className="py-3 pr-4">Method</th>
                     <th className="py-3 pr-4">Status</th>
                   </tr>
                 </thead>
@@ -174,6 +210,7 @@ export default function AdminDashboard() {
                       <td className="py-3 pr-4 font-medium text-ink">{e.user?.name}</td>
                       <td className="py-3 pr-4 text-ink/60">{e.course?.title}</td>
                       <td className="py-3 pr-4 text-ink/60">{e.amountPaid} ETB</td>
+                      <td className="py-3 pr-4 text-ink/60 capitalize">{e.paymentMethod || 'chapa'}</td>
                       <td className="py-3 pr-4">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           e.status === 'paid' ? 'bg-forest-50 text-forest-700' : 'bg-ink/5 text-ink/50'
@@ -187,6 +224,56 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
+
+          {tab === 'Pending Payments' && (
+            <div>
+              <p className="text-sm text-ink/50 mb-5">
+                Manual bank/mobile transfer submissions awaiting receipt review.
+              </p>
+              {pendingPayments.length === 0 ? (
+                <p className="text-ink/40 text-sm">No pending payments right now.</p>
+              ) : (
+                <div className="space-y-4">
+                  {pendingPayments.map((p) => (
+                    <div key={p._id} className="bg-white border border-forest-100 rounded-2xl p-5 flex flex-col sm:flex-row gap-4">
+                      <a href={p.receiptImage} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+                        <img
+                          src={p.receiptImage}
+                          alt="Payment receipt"
+                          className="w-full sm:w-32 h-32 object-cover rounded-lg border border-forest-100"
+                        />
+                      </a>
+                      <div className="flex-1">
+                        <p className="font-medium text-ink">{p.course?.title}</p>
+                        <p className="text-sm text-ink/60 mt-0.5">{p.user?.name} · {p.user?.email}</p>
+                        <p className="text-sm text-forest-700 font-medium mt-1">{p.amountPaid} ETB</p>
+                        <p className="text-xs text-ink/40 mt-1">
+                          Submitted {new Date(p.createdAt).toLocaleString()}
+                        </p>
+                        <div className="flex gap-3 mt-3">
+                          <button
+                            onClick={() => handleApprove(p._id)}
+                            disabled={reviewingId === p._id}
+                            className="bg-forest-700 text-white px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
+                          >
+                            {reviewingId === p._id ? 'Working...' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => handleReject(p._id)}
+                            disabled={reviewingId === p._id}
+                            className="border border-red-300 text-red-600 px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {tab === 'Tutoring Photos' && (
             <div>
               <form onSubmit={handleAddImage} className="bg-white border border-forest-100 rounded-2xl p-5 mb-6">

@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const tutoringRoutes = require('./routes/tutoringRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const paymentInfoRoutes = require('./routes/paymentInfoRoutes');
 
 // Serverless functions can be invoked many times per second across separate
 // instances. Without caching, each invocation would open a fresh MongoDB
@@ -38,7 +39,10 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-app.use(express.json());
+// Default 100kb limit is far too small for base64-encoded receipt image
+// uploads (manual payment flow) — raise it, matching the 8MB app-level cap
+// enforced in submitManualPayment.
+app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
 // Ensure a DB connection exists before handling any request (no-op once cached)
@@ -70,6 +74,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/tutoring', tutoringRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/payment-info', paymentInfoRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -8,12 +8,15 @@ import ProgressBar from '../components/ProgressBar.jsx';
 export default function Dashboard() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
+  const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get('/enrollments/my-courses')
-      .then((res) => setEnrollments(res.data))
+    Promise.all([api.get('/enrollments/my-courses'), api.get('/enrollments/my-pending')])
+      .then(([enrRes, pendingRes]) => {
+        setEnrollments(enrRes.data);
+        setPending(pendingRes.data);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -30,40 +33,73 @@ export default function Dashboard() {
 
       {loading ? (
         <p className="text-ink/50 mt-10">Loading your courses...</p>
-      ) : enrollments.length === 0 ? (
-        <div className="mt-12 bg-forest-50 border border-forest-100 rounded-2xl p-10 text-center">
-          <p className="text-ink/70">You haven't enrolled in any courses yet.</p>
-          <Link to="/courses" className="inline-block mt-4 bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium">
-            Browse courses
-          </Link>
-        </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-          {enrollments.map((enr, i) => (
-            <motion.div
-              key={enr.course?._id || i}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="bg-white border border-forest-100 rounded-2xl p-6"
-            >
-              <h3 className="font-display font-semibold text-lg text-ink">{enr.course?.title}</h3>
-              <div className="mt-4">
-                <div className="flex justify-between text-xs text-ink/50 mb-1.5">
-                  <span>Progress</span>
-                  <span>{enr.progressPercent || 0}%</span>
+        <>
+          {pending.length > 0 && (
+            <div className="mt-8 space-y-3">
+              {pending.map((p) => (
+                <div
+                  key={p._id}
+                  className={`rounded-xl p-4 border flex items-center justify-between ${
+                    p.status === 'rejected'
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-amber-50 border-amber-200'
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm font-medium text-ink">{p.course?.title}</p>
+                    <p className={`text-xs mt-0.5 ${p.status === 'rejected' ? 'text-red-600' : 'text-amber-700'}`}>
+                      {p.status === 'rejected'
+                        ? `Payment not approved${p.rejectionReason ? `: ${p.rejectionReason}` : ''}`
+                        : 'Payment under review — usually reviewed within a few hours'}
+                    </p>
+                  </div>
+                  {p.status === 'rejected' && (
+                    <Link to={`/courses`} className="text-xs font-medium text-forest-700 hover:underline whitespace-nowrap">
+                      Try again
+                    </Link>
+                  )}
                 </div>
-                <ProgressBar percent={enr.progressPercent || 0} />
-              </div>
-              <Link
-                to={`/learn/${enr.course?._id}`}
-                className="inline-block mt-5 text-sm font-medium text-forest-700 hover:underline"
-              >
-                {enr.progressPercent > 0 ? 'Continue learning →' : 'Start learning →'}
+              ))}
+            </div>
+          )}
+
+          {enrollments.length === 0 && pending.length === 0 ? (
+            <div className="mt-12 bg-forest-50 border border-forest-100 rounded-2xl p-10 text-center">
+              <p className="text-ink/70">You haven't enrolled in any courses yet.</p>
+              <Link to="/courses" className="inline-block mt-4 bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium">
+                Browse courses
               </Link>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+              {enrollments.map((enr, i) => (
+                <motion.div
+                  key={enr.course?._id || i}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="bg-white border border-forest-100 rounded-2xl p-6"
+                >
+                  <h3 className="font-display font-semibold text-lg text-ink">{enr.course?.title}</h3>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-xs text-ink/50 mb-1.5">
+                      <span>Progress</span>
+                      <span>{enr.progressPercent || 0}%</span>
+                    </div>
+                    <ProgressBar percent={enr.progressPercent || 0} />
+                  </div>
+                  <Link
+                    to={`/learn/${enr.course?._id}`}
+                    className="inline-block mt-5 text-sm font-medium text-forest-700 hover:underline"
+                  >
+                    {enr.progressPercent > 0 ? 'Continue learning →' : 'Start learning →'}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -6,7 +6,13 @@ const {
   deleteCourse,
   getAllCoursesAdmin
 } = require('../controllers/courseController');
-const { getAllUsers, getAllEnrollments } = require('../controllers/adminController');
+const {
+  getAllUsers,
+  getAllEnrollments,
+  getPendingEnrollments,
+  approveEnrollment,
+  rejectEnrollment
+} = require('../controllers/adminController');
 const { addTutoringImage, deleteTutoringImage } = require('../controllers/tutoringController');
 
 const router = express.Router();
@@ -20,6 +26,10 @@ router.delete('/courses/:id', deleteCourse);
 
 router.get('/users', getAllUsers);
 router.get('/enrollments', getAllEnrollments);
+
+router.get('/pending-enrollments', getPendingEnrollments);
+router.post('/enrollments/:id/approve', approveEnrollment);
+router.post('/enrollments/:id/reject', rejectEnrollment);
 
 router.post('/tutoring-images', addTutoringImage);
 router.delete('/tutoring-images/:id', deleteTutoringImage);
