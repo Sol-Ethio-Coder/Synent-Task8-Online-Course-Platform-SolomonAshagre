@@ -18,6 +18,8 @@ import Dashboard from './pages/Dashboard.jsx';
 import Account from './pages/Account.jsx';
 import PaymentCallback from './pages/PaymentCallback.jsx';
 import Learn from './pages/Learn.jsx';
+import Exam from './pages/Exam.jsx';
+import Certificate from './pages/Certificate.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminCourseEditor from './pages/AdminCourseEditor.jsx';
 import Policy from './pages/Policy.jsx';
@@ -47,6 +49,8 @@ export default function App() {
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="/payment/callback" element={<ProtectedRoute><PaymentCallback /></ProtectedRoute>} />
           <Route path="/learn/:courseId" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
+          <Route path="/exam/:courseId" element={<ProtectedRoute><Exam /></ProtectedRoute>} />
+          <Route path="/certificate/:courseId" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
 
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/courses/:id" element={<AdminRoute><AdminCourseEditor /></AdminRoute>} />

@@ -85,6 +85,15 @@ export default function Learn() {
           <ProgressBar percent={enrollment?.progressPercent || 0} />
         </div>
 
+        {enrollment?.progressPercent >= 100 && (
+          <Link
+            to={enrollment.examPassed ? `/certificate/${courseId}` : `/exam/${courseId}`}
+            className="block text-center text-sm font-medium bg-forest-700 text-white rounded-lg py-2.5 mb-1 hover:bg-forest-600 transition-colors"
+          >
+            {enrollment.examPassed ? '🎓 View certificate' : '📝 Take final exam'}
+          </Link>
+        )}
+
         <div className="mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           {course.modules?.map((mod, mi) => (
             <div key={mod._id || mi}>

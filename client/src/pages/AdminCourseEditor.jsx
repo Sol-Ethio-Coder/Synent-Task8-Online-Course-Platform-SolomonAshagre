@@ -4,6 +4,7 @@ import api from '../api/axios.js';
 
 const emptyLesson = () => ({ title: '', videoUrl: '', duration: '', order: 0 });
 const emptyModule = () => ({ title: '', order: 0, lessons: [emptyLesson()] });
+const emptyExamQuestion = () => ({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' });
 
 const emptyCourse = {
   title: '',
@@ -12,11 +13,13 @@ const emptyCourse = {
   shortDescription: '',
   thumbnail: '',
   category: 'coding-online',
+  curriculum: 'General',
   level: 'beginner',
   price: 0,
   isFree: false,
   published: true,
-  modules: [emptyModule()]
+  modules: [emptyModule()],
+  finalExam: { questions: [], passingScorePercent: 70 }
 };
 
 function slugify(str) {
@@ -69,7 +72,7 @@ export default function AdminCourseEditor() {
     if (isNew) return;
     api.get('/admin/courses').then((res) => {
       const found = res.data.find((c) => c._id === id);
-      if (found) setCourse(found);
+      if (found) setCourse({ ...emptyCourse, ...found, finalExam: found.finalExam || emptyCourse.finalExam });
       setLoading(false);
     });
   }, [id, isNew]);
@@ -103,6 +106,35 @@ export default function AdminCourseEditor() {
     const modules = [...course.modules];
     modules[mi] = { ...modules[mi], lessons: modules[mi].lessons.filter((_, i) => i !== li) };
     setCourse((prev) => ({ ...prev, modules }));
+  };
+
+  const updateExamMeta = (field, value) =>
+    setCourse((prev) => ({ ...prev, finalExam: { ...prev.finalExam, [field]: value } }));
+
+  const addExamQuestion = () =>
+    setCourse((prev) => ({
+      ...prev,
+      finalExam: { ...prev.finalExam, questions: [...prev.finalExam.questions, emptyExamQuestion()] }
+    }));
+
+  const removeExamQuestion = (qi) =>
+    setCourse((prev) => ({
+      ...prev,
+      finalExam: { ...prev.finalExam, questions: prev.finalExam.questions.filter((_, i) => i !== qi) }
+    }));
+
+  const updateExamQuestion = (qi, field, value) => {
+    const questions = [...course.finalExam.questions];
+    questions[qi] = { ...questions[qi], [field]: value };
+    setCourse((prev) => ({ ...prev, finalExam: { ...prev.finalExam, questions } }));
+  };
+
+  const updateExamOption = (qi, oi, value) => {
+    const questions = [...course.finalExam.questions];
+    const options = [...questions[qi].options];
+    options[oi] = value;
+    questions[qi] = { ...questions[qi], options };
+    setCourse((prev) => ({ ...prev, finalExam: { ...prev.finalExam, questions } }));
   };
 
   const handleSubmit = async (e) => {
@@ -172,7 +204,7 @@ export default function AdminCourseEditor() {
             />
           </div>
 
-          <div className="grid sm:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-5 gap-4">
             <div>
               <label className="text-sm font-medium text-ink/70">Category</label>
               <select
@@ -184,6 +216,20 @@ export default function AdminCourseEditor() {
                 <option value="coding-offline">Coding · Offline</option>
                 <option value="tutoring-online">Tutoring · Online</option>
                 <option value="tutoring-offline">Tutoring · Offline</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-ink/70">Curriculum</label>
+              <select
+                value={course.curriculum}
+                onChange={(e) => updateField('curriculum', e.target.value)}
+                className="w-full mt-1 border border-forest-100 rounded-lg px-3 py-2.5 text-sm bg-white"
+              >
+                <option value="General">General</option>
+                <option value="Primary">Primary</option>
+                <option value="IGCSE">IGCSE</option>
+                <option value="A-Level">A-Level</option>
+                <option value="Web Development">Web Development</option>
               </select>
             </div>
             <div>
@@ -276,6 +322,78 @@ export default function AdminCourseEditor() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-display font-semibold text-lg">Final exam</h2>
+              <p className="text-xs text-ink/50 mt-0.5">Passing this unlocks the certificate for enrolled students.</p>
+            </div>
+            <button type="button" onClick={addExamQuestion} className="text-sm text-forest-700 font-medium hover:underline whitespace-nowrap">
+              + Add question
+            </button>
+          </div>
+
+          <div className="bg-white border border-forest-100 rounded-2xl p-5 mb-4">
+            <label className="text-sm font-medium text-ink/70">Passing score (%)</label>
+            <input
+              type="number" min={0} max={100}
+              value={course.finalExam.passingScorePercent}
+              onChange={(e) => updateExamMeta('passingScorePercent', Number(e.target.value))}
+              className="w-32 mt-1 border border-forest-100 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+
+          {course.finalExam.questions.length === 0 ? (
+            <p className="text-sm text-ink/40">No exam questions yet — this course won't have a certificate until you add some.</p>
+          ) : (
+            <div className="space-y-4">
+              {course.finalExam.questions.map((q, qi) => (
+                <div key={qi} className="bg-white border border-forest-100 rounded-2xl p-5">
+                  <div className="flex gap-3 items-start">
+                    <textarea
+                      placeholder={`Question ${qi + 1}`}
+                      value={q.question}
+                      onChange={(e) => updateExamQuestion(qi, 'question', e.target.value)}
+                      rows={2}
+                      className="flex-1 border border-forest-100 rounded-lg px-3 py-2 text-sm"
+                    />
+                    <button type="button" onClick={() => removeExamQuestion(qi)} className="text-red-600 text-sm whitespace-nowrap">
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {q.options.map((opt, oi) => (
+                      <div key={oi} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name={`correct-${qi}`}
+                          checked={q.correctIndex === oi}
+                          onChange={() => updateExamQuestion(qi, 'correctIndex', oi)}
+                          title="Mark as correct answer"
+                        />
+                        <input
+                          placeholder={`Option ${oi + 1}`}
+                          value={opt}
+                          onChange={(e) => updateExamOption(qi, oi, e.target.value)}
+                          className="flex-1 border border-forest-100 rounded-lg px-3 py-2 text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <input
+                    placeholder="Explanation shown after answering (optional)"
+                    value={q.explanation}
+                    onChange={(e) => updateExamQuestion(qi, 'explanation', e.target.value)}
+                    className="w-full mt-3 border border-forest-100 rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}

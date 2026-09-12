@@ -95,6 +95,14 @@ export default function Dashboard() {
                   >
                     {enr.progressPercent > 0 ? 'Continue learning →' : 'Start learning →'}
                   </Link>
+                  {enr.examPassed && (
+                    <Link
+                      to={`/certificate/${enr.course?._id}`}
+                      className="block mt-1.5 text-sm font-medium text-sun-500 hover:underline"
+                    >
+                      🎓 View certificate
+                    </Link>
+                  )}
                 </motion.div>
               ))}
             </div>

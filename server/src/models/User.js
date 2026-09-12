@@ -21,7 +21,14 @@ const userSchema = new mongoose.Schema(
         course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
         enrolledAt: { type: Date, default: Date.now },
         progressPercent: { type: Number, default: 0 },
-        completedLessons: [{ type: mongoose.Schema.Types.ObjectId }]
+        completedLessons: [{ type: mongoose.Schema.Types.ObjectId }],
+
+        // Final exam + certificate
+        examScore: { type: Number },
+        examPassed: { type: Boolean, default: false },
+        examAttempts: { type: Number, default: 0 },
+        certificateId: { type: String },
+        certificateIssuedAt: { type: Date }
       }
     ]
   },

@@ -29,6 +29,16 @@ const moduleSchema = new mongoose.Schema({
   lessons: [lessonSchema]
 });
 
+const examQuestionSchema = new mongoose.Schema(
+  {
+    question: { type: String, required: true },
+    options: [{ type: String, required: true }],
+    correctIndex: { type: Number, required: true },
+    explanation: { type: String, default: '' }
+  },
+  { _id: false }
+);
+
 const courseSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -41,11 +51,24 @@ const courseSchema = new mongoose.Schema(
       enum: ['coding-online', 'coding-offline', 'tutoring-online', 'tutoring-offline'],
       required: true
     },
+    // Matches STCA's actual curriculum stages (as seen on stca-lms.netlify.app)
+    curriculum: {
+      type: String,
+      enum: ['Primary', 'IGCSE', 'A-Level', 'Web Development', 'General'],
+      default: 'General'
+    },
     level: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
     price: { type: Number, required: true, default: 0 }, // in ETB
     isFree: { type: Boolean, default: false },
     published: { type: Boolean, default: true },
     modules: [moduleSchema],
+
+    // Final exam — passing it unlocks the certificate for this course.
+    finalExam: {
+      questions: [examQuestionSchema],
+      passingScorePercent: { type: Number, default: 70 }
+    },
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
   { timestamps: true }

@@ -18,7 +18,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FBF9F4]/90 backdrop-blur border-b border-forest-100">
+    <header className="sticky top-0 z-40 bg-[#FBF9F4]/90 backdrop-blur border-b border-forest-100 print:hidden">
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-5 py-4">
         <Link to="/" className="flex items-center gap-2">
           <Logo size={36} />

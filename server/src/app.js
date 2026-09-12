@@ -14,6 +14,7 @@ const aiRoutes = require('./routes/aiRoutes');
 const tutoringRoutes = require('./routes/tutoringRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const paymentInfoRoutes = require('./routes/paymentInfoRoutes');
+const examRoutes = require('./routes/examRoutes');
 
 // Serverless functions can be invoked many times per second across separate
 // instances. Without caching, each invocation would open a fresh MongoDB
@@ -75,6 +76,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/tutoring', tutoringRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/payment-info', paymentInfoRoutes);
+app.use('/api/exam', examRoutes);
 
 // 404 handler
 app.use((req, res) => {

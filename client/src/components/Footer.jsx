@@ -6,7 +6,7 @@ const MARKETING_SITE = 'https://stca-academy.netlify.app/';
 
 export default function Footer() {
   return (
-    <footer className="bg-forest-700 text-white/80 mt-24">
+    <footer className="bg-forest-700 text-white/80 mt-24 print:hidden">
       <div className="max-w-6xl mx-auto px-5 py-14 grid gap-10 md:grid-cols-4">
         <div>
           <a href={MARKETING_SITE} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mb-3 w-fit">
