@@ -127,4 +127,37 @@ const getCertificate = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getExam, submitExam, getCertificate };
+// @route GET /api/exam/verify/:certificateId
+// Public — no login required. Anyone (e.g. an employer) can paste a
+// certificate ID here to confirm it's real, without exposing anything about
+// the student beyond what the certificate itself already shows.
+const verifyCertificate = asyncHandler(async (req, res) => {
+  const { certificateId } = req.params;
+
+  const user = await User.findOne({ 'enrolledCourses.certificateId': certificateId }).populate(
+    'enrolledCourses.course',
+    'title curriculum level'
+  );
+
+  if (!user) {
+    return res.json({ valid: false });
+  }
+
+  const enrollment = user.enrolledCourses.find((e) => e.certificateId === certificateId);
+  if (!enrollment || !enrollment.examPassed) {
+    return res.json({ valid: false });
+  }
+
+  res.json({
+    valid: true,
+    studentName: user.name,
+    courseTitle: enrollment.course.title,
+    curriculum: enrollment.course.curriculum,
+    level: enrollment.course.level,
+    score: enrollment.examScore,
+    issuedAt: enrollment.certificateIssuedAt,
+    certificateId: enrollment.certificateId
+  });
+});
+
+module.exports = { getExam, submitExam, getCertificate, verifyCertificate };
