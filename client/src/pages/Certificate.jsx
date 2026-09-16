@@ -88,7 +88,11 @@ export default function Certificate() {
       </motion.div>
 
       <p className="text-xs text-ink/40 text-center mt-6 print:hidden">
-        This certificate can be verified by its Certificate ID. Use the button above to save it as a PDF.
+        This certificate can be{' '}
+        <Link to={`/verify-certificate/${cert.certificateId}`} className="underline text-forest-700">
+          verified online
+        </Link>{' '}
+        using its Certificate ID. Use the button above to save it as a PDF.
       </p>
     </div>
   );

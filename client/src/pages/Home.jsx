@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ChatWidget from '../components/ChatWidget.jsx';
+import HeroIllustration from '../components/HeroIllustration.jsx';
+import PathwayJourney from '../components/PathwayJourney.jsx';
 import api from '../api/axios.js';
 
 const fadeUp = {
@@ -95,7 +97,8 @@ export default function Home() {
           transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
           className="relative"
         >
-          <div className="bg-forest-700 rounded-3xl p-8 text-white shadow-xl">
+          <HeroIllustration />
+          <div className="bg-forest-700 rounded-3xl p-8 text-white shadow-xl relative z-0">
             <div className="font-mono text-sm space-y-2 opacity-90">
               <p><span className="text-sun-400">function</span> <span className="text-white">learn</span>() {'{'}</p>
               <p className="pl-4">enroll(<span className="text-sun-400">"coding-101"</span>);</p>
@@ -117,6 +120,18 @@ export default function Home() {
         </motion.div>
       </section>
 
+      <section className="max-w-5xl mx-auto px-5 pb-4">
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center text-xs font-medium tracking-widest text-ink/40 uppercase mb-2"
+        >
+          Your learning journey
+        </motion.p>
+        <PathwayJourney />
+      </section>
+
       <section className="max-w-6xl mx-auto px-5 pb-20">
         <div className="grid md:grid-cols-2 gap-6">
           <motion.div
@@ -124,6 +139,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
+            whileHover={{ y: -4 }}
             className="bg-white border border-forest-100 rounded-2xl p-8"
           >
             <h2 className="font-display font-semibold text-xl text-ink mb-5">Pathways we cover</h2>
@@ -144,6 +160,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ y: -4 }}
             className="bg-forest-700 text-white rounded-2xl p-8 flex flex-col justify-center"
           >
             <p className="font-display font-semibold text-2xl">"Practice makes you perfect!"</p>
@@ -173,9 +190,9 @@ export default function Home() {
           </motion.h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: 'Pick a course or tutor', text: 'Browse coding tracks or request 1:1 tutoring, online or offline, in your subject and level.' },
-              { step: 'Enroll and pay securely', text: 'Enroll instantly with Chapa — via Telebirr, CBE Birr, or card. Free courses unlock immediately.' },
-              { step: 'Learn and track progress', text: 'Work through modules and lessons, mark them complete, and watch your progress bar fill up.' }
+              { step: 'Pick a course or tutor', text: 'Browse coding tracks or request 1:1 tutoring, online or offline, in your subject and level.', icon: '🔍' },
+              { step: 'Enroll and pay securely', text: 'Enroll instantly with Chapa — via Telebirr, CBE Birr, or card. Free courses unlock immediately.', icon: '💳' },
+              { step: 'Learn and track progress', text: 'Work through modules and lessons, mark them complete, and watch your progress bar fill up.', icon: '📈' }
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -183,11 +200,15 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -6, boxShadow: '0 12px 24px rgba(31,75,63,0.08)' }}
                 className="bg-white rounded-2xl p-6 border border-forest-100"
               >
-                <div className="w-9 h-9 rounded-full bg-forest-700 text-sun-400 flex items-center justify-center font-display font-semibold mb-4">
-                  {i + 1}
-                </div>
+                <motion.div
+                  whileHover={{ rotate: 8, scale: 1.1 }}
+                  className="w-11 h-11 rounded-full bg-forest-700 flex items-center justify-center text-lg mb-4"
+                >
+                  {item.icon}
+                </motion.div>
                 <h3 className="font-display font-semibold text-lg mb-2">{item.step}</h3>
                 <p className="text-sm text-ink/65 leading-relaxed">{item.text}</p>
               </motion.div>

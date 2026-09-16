@@ -20,6 +20,7 @@ import PaymentCallback from './pages/PaymentCallback.jsx';
 import Learn from './pages/Learn.jsx';
 import Exam from './pages/Exam.jsx';
 import Certificate from './pages/Certificate.jsx';
+import VerifyCertificate from './pages/VerifyCertificate.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminCourseEditor from './pages/AdminCourseEditor.jsx';
 import Policy from './pages/Policy.jsx';
@@ -44,6 +45,8 @@ export default function App() {
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/verify-certificate" element={<VerifyCertificate />} />
+          <Route path="/verify-certificate/:certificateId" element={<VerifyCertificate />} />
 
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />

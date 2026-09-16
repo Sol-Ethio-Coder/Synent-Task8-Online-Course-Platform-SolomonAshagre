@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import ManualPaymentModal from '../components/ManualPaymentModal.jsx';
+import CourseThumbnail from '../components/CourseThumbnail.jsx';
 
 export default function CourseDetails() {
   const { slug } = useParams();
@@ -65,6 +66,14 @@ export default function CourseDetails() {
         animate={{ opacity: 1, y: 0 }}
         className="md:col-span-2"
       >
+        <div className="h-56 rounded-2xl overflow-hidden mb-6">
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+          ) : (
+            <CourseThumbnail title={course.title} category={course.category} curriculum={course.curriculum} />
+          )}
+        </div>
+
         <span className="text-xs font-medium text-forest-600 bg-forest-50 px-2 py-1 rounded-full capitalize">
           {course.category.replace('-', ' · ')}
         </span>

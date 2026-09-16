@@ -43,6 +43,7 @@ export default function Footer() {
             <li><Link to="/about" className="hover:text-sun-400">About</Link></li>
             <li><Link to="/policy" className="hover:text-sun-400">Privacy Policy</Link></li>
             <li><Link to="/terms" className="hover:text-sun-400">Terms of Service</Link></li>
+            <li><Link to="/verify-certificate" className="hover:text-sun-400">Verify a Certificate</Link></li>
           </ul>
         </div>
 

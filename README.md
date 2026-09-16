@@ -60,17 +60,27 @@ stca-platform/
 - Select course → Enroll Now → redirected to Chapa's hosted checkout page → user pays via Telebirr, CBE Birr, HelloCash, or card → redirected back → on success, course appears on dashboard
 - Free courses skip payment and unlock instantly
 
+**Enrollment flow (manual bank/mobile transfer)**
+- Alternative to Chapa for paid courses — student sees your real Telebirr/CBE details (from env vars, never hardcoded), transfers the amount directly, uploads a screenshot of the confirmation
+- Submission sits as "pending review" — doesn't unlock the course automatically
+- Admin reviews the receipt image in `/admin` → "Pending Payments" tab, and approves (unlocks course + sends confirmation email) or rejects (with a reason shown to the student)
+- Student's dashboard shows "payment under review" or the rejection reason while waiting
+
 **Learning system**
 - Modules → lessons structure
 - Video playback (embed URL per lesson — YouTube/Vimeo/hosted)
 - Mark lessons complete
 - Progress % automatically calculated and displayed
 - **AI explanations & practice quizzes** (free, via Groq) — if a video won't play, or a student just wants a written explanation, they can generate an AI explanation plus 3 multiple-choice practice questions for any lesson with one click. Generated once per lesson, then cached in MongoDB — every future student sees the same cached content instantly, at zero extra API cost
+- **Final exam + certificate** — once a student completes 100% of a course's lessons, a "Take final exam" button appears. Admins write the exam questions per course (with a configurable passing score). Passing unlocks a polished, printable certificate (name, course, curriculum, score, unique certificate ID, "Print / Save as PDF" via the browser) — failing lets the student retake it
+- **Public certificate verification** — anyone (e.g. an employer) can visit `/verify-certificate` and paste a certificate ID to confirm it's genuine, without needing to log in
+- **Auto-generated course thumbnails** — courses created without a thumbnail URL get a unique, deterministic gradient graphic instead of a plain placeholder, based on the course's title/category/curriculum (same course always renders the same way). No image hosting or API key needed; admins can still override with a real thumbnail URL anytime
 
 **Admin panel**
 - Add / edit / delete courses, with dynamic module and lesson editors
 - View all registered users
 - View all enrollments and payment status
+- Manage the photo gallery on the public Tutoring page (paste an image URL + optional caption, remove anytime) — no file upload storage is wired up yet, so images are added by URL (e.g. from Imgur, a Google Drive share link, or any image host)
 
 **Data & notifications**
 - Enrollment and payment records stored in MongoDB
@@ -145,6 +155,7 @@ See `server/.env.example` for the full list — you'll need:
 - `CHAPA_SECRET_KEY` — from your [Chapa dashboard](https://dashboard.chapa.co/) → Settings → API Keys (starts with `CHASECK_TEST-` in test mode)
 - `SERVER_URL` — your backend's public URL, used to build the Chapa webhook callback
 - `GROQ_API_KEY` — free key from [console.groq.com/keys](https://console.groq.com/keys), powers the AI lesson explanations/quizzes feature
+- `PAYMENT_TELEBIRR_NUMBER`, `PAYMENT_CBE_ACCOUNT_NUMBER`, `PAYMENT_CBE_ACCOUNT_NAME` — your **real** account details for the manual transfer payment option. These are read at runtime from env vars, never hardcoded in source, since they're real financial details. Leave any of them blank to hide that payment method from the modal.
 
 The server boots fine without a Chapa key set — it's only required once a paid checkout is attempted.
 
