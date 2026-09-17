@@ -32,8 +32,34 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
 // ---- Admin ----
 
 // @route POST /api/admin/courses
+// If the admin didn't write final exam questions themselves, generate them
+// automatically via AI before saving — so every new course gets a real exam
+// without requiring a separate manual step. Falls back gracefully (course
+// still gets created) if AI generation fails for any reason.
 const createCourse = asyncHandler(async (req, res) => {
-  const course = await Course.create({ ...req.body, createdBy: req.user._id });
+  const courseData = { ...req.body };
+  const hasExam = courseData.finalExam?.questions?.length > 0;
+
+  if (!hasExam && courseData.title) {
+    try {
+      const questions = await generateExamQuestions({
+        courseTitle: courseData.title,
+        description: courseData.description,
+        moduleTitles: (courseData.modules || []).map((m) => m.title).filter(Boolean),
+        count: 8
+      });
+      courseData.finalExam = {
+        questions,
+        passingScorePercent: courseData.finalExam?.passingScorePercent || 70
+      };
+    } catch (err) {
+      console.error('Auto exam generation on course create failed (course will be created without one):', err.response?.data || err.message);
+      // Don't block course creation just because AI generation failed —
+      // the admin can still generate/write one later from the editor.
+    }
+  }
+
+  const course = await Course.create({ ...courseData, createdBy: req.user._id });
   res.status(201).json(course);
 });
 

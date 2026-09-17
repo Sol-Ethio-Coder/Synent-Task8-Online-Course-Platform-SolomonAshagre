@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { motion } from 'framer-motion';
 
 /**
@@ -7,17 +7,26 @@ import { motion } from 'framer-motion';
  * `animated` adds a slow glow pulse + hover pop, used for in-app placements
  * (Navbar/Footer). The static favicon.svg mirrors this markup without motion,
  * since browsers don't reliably animate favicons.
+ *
+ * Uses useId() for the gradient/filter IDs — multiple <Logo> instances can
+ * render on the same page (e.g. Navbar + Home hero + Footer all at once)
+ * and duplicate SVG IDs referenced via url(#id) can silently fail to
+ * resolve in some browsers, making the shield render invisible.
  */
 export default function Logo({ size = 40, animated = true, className = '' }) {
+  const uid = useId();
+  const gradientId = `stca-gradient-${uid}`;
+  const glowId = `stca-glow-${uid}`;
+
   const shieldContent = (
     <>
       <defs>
-        <linearGradient id="stcaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#22C55E" />
           <stop offset="50%" stopColor="#F59E0B" />
           <stop offset="100%" stopColor="#F43F5E" />
         </linearGradient>
-        <filter id="stcaGlow" x="-60%" y="-60%" width="220%" height="220%">
+        <filter id={glowId} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="2.2" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
@@ -27,23 +36,23 @@ export default function Logo({ size = 40, animated = true, className = '' }) {
       </defs>
 
       {/* circuit traces */}
-      <g stroke="url(#stcaGradient)" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.85">
+      <g stroke={`url(#${gradientId})`} strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.85">
         <path d="M22 28 L12 28 L12 18" />
-        <circle cx="12" cy="18" r="2.2" fill="url(#stcaGradient)" />
-        <circle cx="8" cy="28" r="1.6" fill="url(#stcaGradient)" />
+        <circle cx="12" cy="18" r="2.2" fill={`url(#${gradientId})`} />
+        <circle cx="8" cy="28" r="1.6" fill={`url(#${gradientId})`} />
         <path d="M8 28 L4 28" />
         <path d="M78 28 L88 28 L88 18" />
-        <circle cx="88" cy="18" r="2.2" fill="url(#stcaGradient)" />
-        <circle cx="92" cy="28" r="1.6" fill="url(#stcaGradient)" />
+        <circle cx="88" cy="18" r="2.2" fill={`url(#${gradientId})`} />
+        <circle cx="92" cy="28" r="1.6" fill={`url(#${gradientId})`} />
         <path d="M92 28 L96 28" />
       </g>
 
       {/* shield */}
-      <g filter="url(#stcaGlow)">
+      <g filter={`url(#${glowId})`}>
         <path
           d="M50 12 L80 22 L80 46 C80 66 68 80 50 90 C32 80 20 66 20 46 L20 22 Z"
           fill="#05070D"
-          stroke="url(#stcaGradient)"
+          stroke={`url(#${gradientId})`}
           strokeWidth="3.2"
           strokeLinejoin="round"
         />

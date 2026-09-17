@@ -387,7 +387,9 @@ export default function AdminCourseEditor() {
           </div>
 
           {course.finalExam.questions.length === 0 ? (
-            <p className="text-sm text-ink/40">No exam questions yet — this course won't have a certificate until you add some.</p>
+            <p className="text-sm text-ink/40">
+              No exam questions yet. {isNew ? "That's fine — AI will automatically generate a full exam when you save this course." : 'Click "✨ Generate with AI" above, or add questions manually.'}
+            </p>
           ) : (
             <div className="space-y-4">
               {course.finalExam.questions.map((q, qi) => (
