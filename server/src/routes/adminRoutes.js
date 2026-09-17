@@ -4,14 +4,16 @@ const {
   createCourse,
   updateCourse,
   deleteCourse,
-  getAllCoursesAdmin
+  getAllCoursesAdmin,
+  generateExam
 } = require('../controllers/courseController');
 const {
   getAllUsers,
   getAllEnrollments,
   getPendingEnrollments,
   approveEnrollment,
-  rejectEnrollment
+  rejectEnrollment,
+  getExamResults
 } = require('../controllers/adminController');
 const { addTutoringImage, deleteTutoringImage } = require('../controllers/tutoringController');
 
@@ -23,9 +25,11 @@ router.get('/courses', getAllCoursesAdmin);
 router.post('/courses', createCourse);
 router.put('/courses/:id', updateCourse);
 router.delete('/courses/:id', deleteCourse);
+router.post('/generate-exam', generateExam);
 
 router.get('/users', getAllUsers);
 router.get('/enrollments', getAllEnrollments);
+router.get('/exam-results', getExamResults);
 
 router.get('/pending-enrollments', getPendingEnrollments);
 router.post('/enrollments/:id/approve', approveEnrollment);

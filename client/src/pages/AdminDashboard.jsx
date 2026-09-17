@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 
-const BASE_TABS = ['Courses', 'Users', 'Enrollments', 'Tutoring Photos'];
+const BASE_TABS = ['Courses', 'Users', 'Enrollments', 'Exam Results', 'Tutoring Photos'];
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('Courses');
@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [enrollments, setEnrollments] = useState([]);
   const [images, setImages] = useState([]);
   const [pendingPayments, setPendingPayments] = useState([]);
+  const [examResults, setExamResults] = useState([]);
   const [imageForm, setImageForm] = useState({ url: '', caption: '' });
   const [addingImage, setAddingImage] = useState(false);
   const [imageError, setImageError] = useState('');
@@ -20,18 +21,20 @@ export default function AdminDashboard() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, u, e, img, pending] = await Promise.all([
+    const [c, u, e, img, pending, results] = await Promise.all([
       api.get('/admin/courses'),
       api.get('/admin/users'),
       api.get('/admin/enrollments'),
       api.get('/tutoring/images'),
-      api.get('/admin/pending-enrollments')
+      api.get('/admin/pending-enrollments'),
+      api.get('/admin/exam-results')
     ]);
     setCourses(c.data);
     setUsers(u.data);
     setEnrollments(e.data);
     setImages(img.data);
     setPendingPayments(pending.data);
+    setExamResults(results.data);
     setLoading(false);
   };
 
@@ -222,6 +225,45 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {tab === 'Exam Results' && (
+            <div className="overflow-x-auto">
+              {examResults.length === 0 ? (
+                <p className="text-ink/40 text-sm">No exam attempts yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-ink/50 border-b border-forest-100">
+                      <th className="py-3 pr-4">Student</th>
+                      <th className="py-3 pr-4">Course</th>
+                      <th className="py-3 pr-4">Score</th>
+                      <th className="py-3 pr-4">Attempts</th>
+                      <th className="py-3 pr-4">Result</th>
+                      <th className="py-3 pr-4">Certificate ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {examResults.map((r, i) => (
+                      <tr key={i} className="border-b border-forest-50">
+                        <td className="py-3 pr-4 font-medium text-ink">{r.studentName}<br /><span className="text-xs text-ink/40 font-normal">{r.studentEmail}</span></td>
+                        <td className="py-3 pr-4 text-ink/60">{r.courseTitle}</td>
+                        <td className="py-3 pr-4 text-ink/60">{r.examScore}%</td>
+                        <td className="py-3 pr-4 text-ink/60">{r.examAttempts}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            r.examPassed ? 'bg-forest-50 text-forest-700' : 'bg-red-50 text-red-600'
+                          }`}>
+                            {r.examPassed ? 'Passed' : 'Not passed'}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 text-ink/40 text-xs">{r.certificateId || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
 

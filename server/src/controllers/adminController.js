@@ -75,10 +75,43 @@ const rejectEnrollment = asyncHandler(async (req, res) => {
   res.json({ message: 'Enrollment rejected', enrollment });
 });
 
+// @route GET /api/admin/exam-results
+// Flattened view across all students of who has attempted/passed which
+// course's final exam, for admin visibility (separate from payment records).
+const getExamResults = asyncHandler(async (req, res) => {
+  const users = await User.find({ 'enrolledCourses.examAttempts': { $gt: 0 } })
+    .select('name email enrolledCourses')
+    .populate('enrolledCourses.course', 'title');
+
+  const results = [];
+  for (const user of users) {
+    for (const enr of user.enrolledCourses) {
+      if (!enr.examAttempts) continue;
+      results.push({
+        studentName: user.name,
+        studentEmail: user.email,
+        // enr.course may be null if that course was later deleted
+        courseTitle: enr.course?.title || '(deleted course)',
+        examScore: enr.examScore,
+        examAttempts: enr.examAttempts,
+        examPassed: enr.examPassed,
+        certificateId: enr.certificateId,
+        certificateIssuedAt: enr.certificateIssuedAt
+      });
+    }
+  }
+
+  // Most recently attempted first
+  results.sort((a, b) => new Date(b.certificateIssuedAt || 0) - new Date(a.certificateIssuedAt || 0));
+
+  res.json(results);
+});
+
 module.exports = {
   getAllUsers,
   getAllEnrollments,
   getPendingEnrollments,
   approveEnrollment,
-  rejectEnrollment
+  rejectEnrollment,
+  getExamResults
 };

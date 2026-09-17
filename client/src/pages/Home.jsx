@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import ChatWidget from '../components/ChatWidget.jsx';
 import HeroIllustration from '../components/HeroIllustration.jsx';
 import PathwayJourney from '../components/PathwayJourney.jsx';
+import Logo from '../components/Logo.jsx';
 import api from '../api/axios.js';
 
 const fadeUp = {
@@ -33,6 +34,14 @@ export default function Home() {
     <div>
       <section className="max-w-6xl mx-auto px-5 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center">
         <div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <Logo size={64} />
+          </motion.div>
           <motion.p
             variants={fadeUp} initial="hidden" animate="show" custom={0}
             className="text-forest-600 font-medium text-sm tracking-wide mb-4"

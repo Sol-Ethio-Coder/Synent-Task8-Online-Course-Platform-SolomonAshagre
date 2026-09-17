@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import api from '../api/axios.js';
 
@@ -20,6 +20,7 @@ const offerings = [
 
 export default function Tutoring() {
   const [images, setImages] = useState([]);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     api.get('/tutoring/images').then((res) => setImages(res.data)).catch(() => setImages([]));
@@ -65,15 +66,64 @@ export default function Tutoring() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06, duration: 0.4 }}
-                className="rounded-2xl overflow-hidden border border-forest-100 bg-white"
+                onClick={() => setSelected(img)}
+                className="group relative rounded-2xl overflow-hidden border border-forest-100 bg-white cursor-pointer"
               >
-                <img src={img.url} alt={img.caption || 'STCA tutoring'} className="w-full h-48 object-cover" />
+                <div className="relative overflow-hidden h-48">
+                  <img
+                    src={img.url}
+                    alt={img.caption || 'STCA tutoring'}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                    <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1.5">
+                      🔍 View
+                    </span>
+                  </div>
+                </div>
                 {img.caption && <figcaption className="text-xs text-ink/60 px-3 py-2">{img.caption}</figcaption>}
               </motion.figure>
             ))}
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelected(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-3xl w-full"
+            >
+              <img
+                src={selected.url}
+                alt={selected.caption || 'STCA tutoring'}
+                className="w-full max-h-[80vh] object-contain rounded-xl"
+              />
+              {selected.caption && (
+                <p className="text-white/80 text-sm text-center mt-3">{selected.caption}</p>
+              )}
+            </motion.div>
+            <button
+              onClick={() => setSelected(null)}
+              className="absolute top-5 right-5 text-white/80 hover:text-white text-2xl leading-none"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-14 bg-forest-700 text-white rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>

@@ -108,7 +108,12 @@ const submitExam = asyncHandler(async (req, res) => {
 // @route GET /api/exam/:courseId/certificate
 const getCertificate = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const user = await User.findById(req.user._id).populate('enrolledCourses.course', 'title curriculum level category');
+
+  // Find the enrollment BEFORE populating — findEnrollment expects
+  // enrolledCourses.course to still be a raw ObjectId here. Populating first
+  // turns it into a full object (or null, if the course was ever deleted),
+  // and calling .toString() on that crashes or silently never matches.
+  const user = await User.findById(req.user._id);
   const enrollment = findEnrollment(user, courseId);
 
   if (!enrollment || !enrollment.examPassed) {
@@ -116,11 +121,17 @@ const getCertificate = asyncHandler(async (req, res) => {
     throw new Error('You need to pass the final exam before you can access this certificate');
   }
 
+  const course = await Course.findById(courseId).select('title curriculum level');
+  if (!course) {
+    res.status(404);
+    throw new Error('The course for this certificate no longer exists');
+  }
+
   res.json({
     studentName: user.name,
-    courseTitle: enrollment.course.title,
-    curriculum: enrollment.course.curriculum,
-    level: enrollment.course.level,
+    courseTitle: course.title,
+    curriculum: course.curriculum,
+    level: course.level,
     score: enrollment.examScore,
     certificateId: enrollment.certificateId,
     issuedAt: enrollment.certificateIssuedAt
@@ -144,7 +155,9 @@ const verifyCertificate = asyncHandler(async (req, res) => {
   }
 
   const enrollment = user.enrolledCourses.find((e) => e.certificateId === certificateId);
-  if (!enrollment || !enrollment.examPassed) {
+  // enrollment.course can be null here if that course was later deleted —
+  // guard against it rather than crashing on enrollment.course.title.
+  if (!enrollment || !enrollment.examPassed || !enrollment.course) {
     return res.json({ valid: false });
   }
 

@@ -67,6 +67,8 @@ export default function AdminCourseEditor() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [generatingExam, setGeneratingExam] = useState(false);
+  const [examGenError, setExamGenError] = useState('');
 
   useEffect(() => {
     if (isNew) return;
@@ -116,6 +118,34 @@ export default function AdminCourseEditor() {
       ...prev,
       finalExam: { ...prev.finalExam, questions: [...prev.finalExam.questions, emptyExamQuestion()] }
     }));
+
+  const handleGenerateExam = async () => {
+    if (!course.title.trim()) {
+      setExamGenError('Add a course title first — the AI needs it for context.');
+      return;
+    }
+    if (
+      course.finalExam.questions.length > 0 &&
+      !confirm('This will replace the current exam questions. Continue?')
+    ) {
+      return;
+    }
+    setExamGenError('');
+    setGeneratingExam(true);
+    try {
+      const { data } = await api.post('/admin/generate-exam', {
+        title: course.title,
+        description: course.description,
+        moduleTitles: course.modules.map((m) => m.title).filter(Boolean),
+        count: 8
+      });
+      setCourse((prev) => ({ ...prev, finalExam: { ...prev.finalExam, questions: data.questions } }));
+    } catch (err) {
+      setExamGenError(err.response?.data?.message || 'Could not generate exam questions right now.');
+    } finally {
+      setGeneratingExam(false);
+    }
+  };
 
   const removeExamQuestion = (qi) =>
     setCourse((prev) => ({
@@ -325,15 +355,26 @@ export default function AdminCourseEditor() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
               <h2 className="font-display font-semibold text-lg">Final exam</h2>
               <p className="text-xs text-ink/50 mt-0.5">Passing this unlocks the certificate for enrolled students.</p>
             </div>
-            <button type="button" onClick={addExamQuestion} className="text-sm text-forest-700 font-medium hover:underline whitespace-nowrap">
-              + Add question
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleGenerateExam}
+                disabled={generatingExam}
+                className="text-sm bg-forest-50 text-forest-700 border border-forest-200 px-3 py-1.5 rounded-full font-medium hover:bg-forest-100 disabled:opacity-60 whitespace-nowrap"
+              >
+                {generatingExam ? 'Generating...' : '✨ Generate with AI'}
+              </button>
+              <button type="button" onClick={addExamQuestion} className="text-sm text-forest-700 font-medium hover:underline whitespace-nowrap">
+                + Add question
+              </button>
+            </div>
           </div>
+          {examGenError && <p className="text-sm text-red-600 mb-4">{examGenError}</p>}
 
           <div className="bg-white border border-forest-100 rounded-2xl p-5 mb-4">
             <label className="text-sm font-medium text-ink/70">Passing score (%)</label>

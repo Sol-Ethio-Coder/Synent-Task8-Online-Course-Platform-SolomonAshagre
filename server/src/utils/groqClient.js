@@ -139,4 +139,51 @@ async function chatReply(history) {
   return raw;
 }
 
-module.exports = { generateLessonContent, chatReply };
+/**
+ * Generates a full set of multiple-choice final exam questions for a course,
+ * using its title/description/module titles as context. Admins review and
+ * can edit before saving — this doesn't publish anything on its own.
+ */
+async function generateExamQuestions({ courseTitle, description, moduleTitles, count = 8 }) {
+  const systemPrompt = `You are an experienced instructor writing a final exam for an online course platform called STCA.
+Respond with ONLY valid JSON, no markdown fences, matching exactly this shape:
+{
+  "questions": [
+    {
+      "question": "a exam question testing understanding of the course material",
+      "options": ["option A", "option B", "option C", "option D"],
+      "correctIndex": 0,
+      "explanation": "one sentence on why that answer is correct"
+    }
+  ]
+}
+Include exactly ${count} questions, covering different parts of the course rather than repeating the same topic.
+Keep options concise and unambiguous — exactly one option should be clearly correct. correctIndex is 0-based.`;
+
+  const userPrompt = `Course: ${courseTitle}\nDescription: ${description || 'N/A'}\nModules: ${
+    moduleTitles?.length ? moduleTitles.join(', ') : 'N/A'
+  }`;
+
+  const raw = await runWithFallback(
+    [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    { jsonMode: true, maxTokens: 2000 }
+  );
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    throw new Error('Could not parse AI response as JSON');
+  }
+
+  if (!Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+    throw new Error('AI response was missing expected fields');
+  }
+
+  return parsed.questions;
+}
+
+module.exports = { generateLessonContent, chatReply, generateExamQuestions };
