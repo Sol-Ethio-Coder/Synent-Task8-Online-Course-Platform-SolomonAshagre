@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import ChatWidget from '../components/ChatWidget.jsx';
 import HeroIllustration from '../components/HeroIllustration.jsx';
 import PathwayJourney from '../components/PathwayJourney.jsx';
+import MovingBackground from '../components/MovingBackground.jsx';
 import Logo from '../components/Logo.jsx';
 import api from '../api/axios.js';
 
@@ -32,7 +33,9 @@ export default function Home() {
 
   return (
     <div>
-      <section className="max-w-6xl mx-auto px-5 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center">
+      <div className="relative overflow-hidden">
+        <MovingBackground />
+        <section className="max-w-6xl mx-auto px-5 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center relative z-10">
         <div>
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -40,7 +43,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="mb-6"
           >
-            <Logo size={64} />
+            <Logo size={120} />
           </motion.div>
           <motion.p
             variants={fadeUp} initial="hidden" animate="show" custom={0}
@@ -127,7 +130,8 @@ export default function Home() {
             </div>
           </div>
         </motion.div>
-      </section>
+        </section>
+      </div>
 
       <section className="max-w-5xl mx-auto px-5 pb-4">
         <motion.p

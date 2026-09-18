@@ -26,8 +26,9 @@ export default function Logo({ size = 40, animated = true, className = '' }) {
       alt="Sol Tutoring And Coding Academy"
       width={size}
       height={size}
-      className={`object-contain ${className}`}
-      whileHover={{ scale: 1.08 }}
+      className={`object-contain cursor-pointer ${className}`}
+      whileHover={{ scale: 1.18, rotate: -3 }}
+      whileTap={{ scale: 1.05 }}
       animate={{
         filter: [
           'drop-shadow(0 0 1px rgba(245,158,11,0.3))',
@@ -36,7 +37,8 @@ export default function Logo({ size = 40, animated = true, className = '' }) {
         ]
       }}
       transition={{
-        scale: { type: 'spring', stiffness: 300, damping: 15 },
+        scale: { type: 'spring', stiffness: 300, damping: 12 },
+        rotate: { type: 'spring', stiffness: 300, damping: 12 },
         filter: { duration: 3, repeat: Infinity, ease: 'easeInOut' }
       }}
       style={{ willChange: 'filter, transform' }}
