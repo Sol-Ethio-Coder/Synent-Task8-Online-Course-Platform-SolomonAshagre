@@ -1,9 +1,11 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export default function Policy() {
   return (
     <div className="max-w-3xl mx-auto px-5 py-16">
-      <h1 className="text-3xl font-display font-semibold text-ink mb-2">Privacy Policy</h1>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <h1 className="text-3xl font-display font-semibold text-ink mb-2">Privacy Policy</h1>
       <p className="text-sm text-ink/50 mb-10">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
       <div className="prose-sm max-w-none space-y-6 text-ink/75 leading-relaxed">
@@ -68,7 +70,7 @@ export default function Policy() {
           <h2 className="font-display font-semibold text-lg text-ink mb-2">8. Contact</h2>
           <p>Questions about this policy? Email us at solash5156@gmail.com.</p>
         </section>
-      </div>
+      </div>      </motion.div>
     </div>
   );
 }

@@ -1,110 +1,32 @@
-import React, { useId } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * STCA shield logo — vector reconstruction of the brand mark (gradient
- * green→amber→rose shield, circuit-trace accents, split book/code icon).
- * `animated` adds a slow glow pulse + hover pop, used for in-app placements
- * (Navbar/Footer). The static favicon.svg mirrors this markup without motion,
- * since browsers don't reliably animate favicons.
- *
- * Uses useId() for the gradient/filter IDs — multiple <Logo> instances can
- * render on the same page (e.g. Navbar + Home hero + Footer all at once)
- * and duplicate SVG IDs referenced via url(#id) can silently fail to
- * resolve in some browsers, making the shield render invisible.
+ * STCA's real logo image (uploaded by the founder), rendered with the same
+ * hover-pop + slow glow-pulse effect the earlier hand-drawn SVG version had.
+ * CSS drop-shadow filters and framer-motion animations work identically on
+ * an <img> as they did on inline SVG, so the "awesome effects" carry over.
  */
 export default function Logo({ size = 40, animated = true, className = '' }) {
-  const uid = useId();
-  const gradientId = `stca-gradient-${uid}`;
-  const glowId = `stca-glow-${uid}`;
-
-  const shieldContent = (
-    <>
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#22C55E" />
-          <stop offset="50%" stopColor="#F59E0B" />
-          <stop offset="100%" stopColor="#F43F5E" />
-        </linearGradient>
-        <filter id={glowId} x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="2.2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      {/* circuit traces */}
-      <g stroke={`url(#${gradientId})`} strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.85">
-        <path d="M22 28 L12 28 L12 18" />
-        <circle cx="12" cy="18" r="2.2" fill={`url(#${gradientId})`} />
-        <circle cx="8" cy="28" r="1.6" fill={`url(#${gradientId})`} />
-        <path d="M8 28 L4 28" />
-        <path d="M78 28 L88 28 L88 18" />
-        <circle cx="88" cy="18" r="2.2" fill={`url(#${gradientId})`} />
-        <circle cx="92" cy="28" r="1.6" fill={`url(#${gradientId})`} />
-        <path d="M92 28 L96 28" />
-      </g>
-
-      {/* shield */}
-      <g filter={`url(#${glowId})`}>
-        <path
-          d="M50 12 L80 22 L80 46 C80 66 68 80 50 90 C32 80 20 66 20 46 L20 22 Z"
-          fill="#05070D"
-          stroke={`url(#${gradientId})`}
-          strokeWidth="3.2"
-          strokeLinejoin="round"
-        />
-      </g>
-
-      {/* S monogram */}
-      <text
-        x="50"
-        y="38"
-        textAnchor="middle"
-        fontFamily="Georgia, serif"
-        fontWeight="700"
-        fontSize="20"
-        fill="#FFFFFF"
-      >
-        S
-      </text>
-
-      {/* split icon: book (left) + code (right) */}
-      <g stroke="#FFFFFF" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M36 50 C33 48.5 30 48 27.5 48.5 L27.5 65 C30 64.5 33 65 36 66.5 Z" />
-        <path d="M36 50 L36 66.5" />
-      </g>
-      <text
-        x="63"
-        y="63"
-        textAnchor="middle"
-        fontFamily="'Courier New', monospace"
-        fontWeight="700"
-        fontSize="13"
-        fill="#FFFFFF"
-      >
-        {'</>'}
-      </text>
-    </>
-  );
-
   if (!animated) {
     return (
-      <svg viewBox="0 0 100 100" width={size} height={size} className={className} xmlns="http://www.w3.org/2000/svg">
-        {shieldContent}
-      </svg>
+      <img
+        src="/logo.png"
+        alt="Sol Tutoring And Coding Academy"
+        width={size}
+        height={size}
+        className={`object-contain ${className}`}
+      />
     );
   }
 
   return (
-    <motion.svg
-      viewBox="0 0 100 100"
+    <motion.img
+      src="/logo.png"
+      alt="Sol Tutoring And Coding Academy"
       width={size}
       height={size}
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
+      className={`object-contain ${className}`}
       whileHover={{ scale: 1.08 }}
       animate={{
         filter: [
@@ -118,8 +40,6 @@ export default function Logo({ size = 40, animated = true, className = '' }) {
         filter: { duration: 3, repeat: Infinity, ease: 'easeInOut' }
       }}
       style={{ willChange: 'filter, transform' }}
-    >
-      {shieldContent}
-    </motion.svg>
+    />
   );
 }

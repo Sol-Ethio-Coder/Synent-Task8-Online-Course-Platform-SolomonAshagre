@@ -72,7 +72,7 @@ stca-platform/
 - Mark lessons complete
 - Progress % automatically calculated and displayed
 - **AI explanations & practice quizzes** (free, via Groq) — if a video won't play, or a student just wants a written explanation, they can generate an AI explanation plus 3 multiple-choice practice questions for any lesson with one click. Generated once per lesson, then cached in MongoDB — every future student sees the same cached content instantly, at zero extra API cost
-- **Final exam + certificate** — once a student completes 100% of a course's lessons, a "Take final exam" button appears. Admins write the exam questions per course (with a configurable passing score) — or click **"✨ Generate with AI"** to have Groq draft a full set of questions from the course's title/description/modules, which the admin reviews and edits before saving. Passing unlocks a polished, printable certificate (name, course, curriculum, score, unique certificate ID, "Print / Save as PDF" via the browser) — failing lets the student retake it
+- **Final exam + certificate** — once a student completes 100% of a course's lessons, a "Take final exam" button appears. **Every course automatically gets a full AI-generated exam** — on creation, and also when editing a course that doesn't have one yet (e.g. modules added after the fact) — no admin action needed. Admins can still review/edit it, click "✨ Generate with AI" to regenerate, or write questions by hand. Configurable passing score. Passing unlocks a polished, printable certificate (name, course, curriculum, score, unique certificate ID, "Print / Save as PDF" via the browser) — failing lets the student retake it
 - **Exam results (admin)** — a dedicated "Exam Results" tab in `/admin` shows every student's score, attempt count, pass/fail, and certificate ID across all courses
 - **Public certificate verification** — anyone (e.g. an employer) can visit `/verify-certificate` and paste a certificate ID to confirm it's genuine, without needing to log in
 - **Auto-generated course thumbnails** — courses created without a thumbnail URL get a unique, deterministic gradient graphic instead of a plain placeholder, based on the course's title/category/curriculum (same course always renders the same way). No image hosting or API key needed; admins can still override with a real thumbnail URL anytime
@@ -88,10 +88,10 @@ stca-platform/
 - Email sent on registration and on successful enrollment
 
 **Extras requested**
-- Favicon
-- Framer Motion animations throughout (hero, cards, page transitions, progress bars)
+- Favicon and logo — the founder's actual uploaded logo image (`client/public/logo.png`), not a redrawn recreation, used site-wide (navbar, footer, homepage hero, About page, certificates) with a hover-pop + slow glow-pulse effect
+- Framer Motion animations and hover effects across every page — entrance transitions, button hover/tap feedback, animated status transitions — not just the homepage
 - Privacy Policy and Terms of Service pages (Chapa/ETB-aware)
-- Developer credit in the footer, linking to [mistir.netlify.app](https://mistir.netlify.app/)
+- Developer credit in the footer, linking to [Solomon Ashagre's portfolio](https://sol-ethio-coder.netlify.app/)
 - **Homepage AI chatbot** — a floating chat widget (bottom-right, 💬) lets visitors ask about courses, pricing, and enrollment before signing up, powered by the same free Groq API. Public endpoint, stateless, rate-limited to 30 requests/15min per IP since it has no login in front of it
 
 ## 💳 How the Chapa payment flow works

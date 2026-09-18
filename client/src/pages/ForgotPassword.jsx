@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 
 export default function ForgotPassword() {
@@ -21,7 +22,12 @@ export default function ForgotPassword() {
 
   return (
     <div className="max-w-md mx-auto px-5 py-24">
-      <div className="bg-white border border-forest-100 rounded-2xl p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white border border-forest-100 rounded-2xl p-8"
+      >
         <h1 className="text-2xl font-display font-semibold text-ink">Reset your password</h1>
         <p className="text-sm text-ink/60 mt-1">Enter your email and we'll send a reset link.</p>
 
@@ -30,18 +36,28 @@ export default function ForgotPassword() {
             type="email" required value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full border border-forest-100 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest-400"
+            className="w-full border border-forest-100 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest-400 transition-colors"
           />
-          <button
+          <motion.button
             type="submit" disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             className="w-full bg-forest-700 text-white py-2.5 rounded-full font-medium disabled:opacity-60"
           >
             {loading ? 'Sending...' : 'Send reset link'}
-          </button>
+          </motion.button>
         </form>
 
-        {message && <p className="text-sm text-forest-700 mt-4">{message}</p>}
-      </div>
+        {message && (
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-forest-700 mt-4"
+          >
+            {message}
+          </motion.p>
+        )}
+      </motion.div>
     </div>
   );
 }

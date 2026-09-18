@@ -64,8 +64,30 @@ const createCourse = asyncHandler(async (req, res) => {
 });
 
 // @route PUT /api/admin/courses/:id
+// Same auto-generation logic as createCourse — covers courses that predate
+// this feature, or ones where modules were only added in a later edit.
 const updateCourse = asyncHandler(async (req, res) => {
-  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+  const courseData = { ...req.body };
+  const hasExam = courseData.finalExam?.questions?.length > 0;
+
+  if (!hasExam && courseData.title) {
+    try {
+      const questions = await generateExamQuestions({
+        courseTitle: courseData.title,
+        description: courseData.description,
+        moduleTitles: (courseData.modules || []).map((m) => m.title).filter(Boolean),
+        count: 8
+      });
+      courseData.finalExam = {
+        questions,
+        passingScorePercent: courseData.finalExam?.passingScorePercent || 70
+      };
+    } catch (err) {
+      console.error('Auto exam generation on course update failed (course will be saved without one):', err.response?.data || err.message);
+    }
+  }
+
+  const course = await Course.findByIdAndUpdate(req.params.id, courseData, {
     new: true,
     runValidators: true
   });

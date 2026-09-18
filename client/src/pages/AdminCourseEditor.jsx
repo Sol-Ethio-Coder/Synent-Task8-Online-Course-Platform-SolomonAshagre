@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 
 const emptyLesson = () => ({ title: '', videoUrl: '', duration: '', order: 0 });
@@ -190,11 +191,21 @@ export default function AdminCourseEditor() {
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-14">
-      <h1 className="text-3xl font-display font-semibold text-ink mb-8">
+      <motion.h1
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="text-3xl font-display font-semibold text-ink mb-8"
+      >
         {isNew ? 'New course' : `Edit: ${course.title}`}
-      </h1>
+      </motion.h1>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <motion.form
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        onSubmit={handleSubmit} className="space-y-8"
+      >
         <div className="bg-white border border-forest-100 rounded-2xl p-6 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
@@ -442,17 +453,24 @@ export default function AdminCourseEditor() {
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex gap-3">
-          <button
+          <motion.button
             type="submit" disabled={saving}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             className="bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium disabled:opacity-60"
           >
             {saving ? 'Saving...' : isNew ? 'Create course' : 'Save changes'}
-          </button>
-          <button type="button" onClick={() => navigate('/admin')} className="px-6 py-2.5 rounded-full font-medium border border-forest-100">
+          </motion.button>
+          <motion.button
+            type="button" onClick={() => navigate('/admin')}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2.5 rounded-full font-medium border border-forest-100"
+          >
             Cancel
-          </button>
+          </motion.button>
         </div>
-      </form>
+      </motion.form>
     </div>
   );
 }

@@ -52,13 +52,15 @@ export default function VerifyCertificate() {
             placeholder="e.g. STCA-A1B2C3-D4E5F6-7A8B9C"
             className="flex-1 border border-forest-100 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest-400"
           />
-          <button
+          <motion.button
             type="submit"
             disabled={loading}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
             className="bg-forest-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-60 whitespace-nowrap"
           >
             {loading ? 'Checking...' : 'Verify'}
-          </button>
+          </motion.button>
         </form>
 
         {checked && result && (
