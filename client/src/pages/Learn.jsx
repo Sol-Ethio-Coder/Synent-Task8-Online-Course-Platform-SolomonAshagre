@@ -114,8 +114,10 @@ export default function Learn() {
               <ul className="space-y-1">
                 {mod.lessons?.map((lesson) => (
                   <li key={lesson._id}>
-                    <button
+                    <motion.button
                       onClick={() => setActiveLesson(lesson)}
+                      whileHover={{ x: 2 }}
+                      whileTap={{ scale: 0.98 }}
                       className={`w-full text-left text-sm px-3 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                         activeLesson?._id === lesson._id
                           ? 'bg-forest-50 text-forest-700 font-medium'
@@ -128,7 +130,7 @@ export default function Learn() {
                         {isCompleted(lesson._id) && '✓'}
                       </span>
                       {lesson.title}
-                    </button>
+                    </motion.button>
                   </li>
                 ))}
               </ul>
@@ -159,13 +161,15 @@ export default function Learn() {
 
               <div className="flex items-center justify-between mt-5">
                 <h2 className="font-display font-semibold text-xl text-ink">{activeLesson.title}</h2>
-                <button
+                <motion.button
                   onClick={handleMarkComplete}
                   disabled={marking || isCompleted(activeLesson._id)}
+                  whileHover={!isCompleted(activeLesson._id) ? { scale: 1.05 } : {}}
+                  whileTap={!isCompleted(activeLesson._id) ? { scale: 0.97 } : {}}
                   className="text-sm font-medium bg-forest-700 text-white px-5 py-2.5 rounded-full disabled:opacity-50 whitespace-nowrap"
                 >
                   {isCompleted(activeLesson._id) ? 'Completed ✓' : marking ? 'Saving...' : 'Mark as complete'}
-                </button>
+                </motion.button>
               </div>
 
               <AiLessonAssist

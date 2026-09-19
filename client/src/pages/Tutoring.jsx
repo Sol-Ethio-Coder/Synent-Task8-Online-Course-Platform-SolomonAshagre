@@ -114,13 +114,15 @@ export default function Tutoring() {
                 <p className="text-white/80 text-sm text-center mt-3">{selected.caption}</p>
               )}
             </motion.div>
-            <button
+            <motion.button
               onClick={() => setSelected(null)}
+              whileHover={{ scale: 1.2, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
               className="absolute top-5 right-5 text-white/80 hover:text-white text-2xl leading-none"
               aria-label="Close"
             >
               ✕
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

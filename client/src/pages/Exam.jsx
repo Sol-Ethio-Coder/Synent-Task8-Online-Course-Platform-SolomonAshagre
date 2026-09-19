@@ -71,22 +71,26 @@ export default function Exam() {
           {result.passed ? (
             <>
               <p className="text-forest-700 font-medium mt-4">🎉 You passed!</p>
-              <Link
-                to={`/certificate/${courseId}`}
-                className="inline-block mt-5 bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium"
-              >
-                View your certificate
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="inline-block mt-5">
+                <Link
+                  to={`/certificate/${courseId}`}
+                  className="inline-block bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium"
+                >
+                  View your certificate
+                </Link>
+              </motion.div>
             </>
           ) : (
             <>
               <p className="text-red-600 font-medium mt-4">Not quite — you can try again.</p>
-              <button
+              <motion.button
                 onClick={retake}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
                 className="inline-block mt-5 bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium"
               >
                 Retake exam
-              </button>
+              </motion.button>
             </>
           )}
 
@@ -114,7 +118,13 @@ export default function Exam() {
 
       <div className="mt-8 space-y-6">
         {exam.questions.map((q, qi) => (
-          <div key={qi} className="bg-white border border-forest-100 rounded-2xl p-5">
+          <motion.div
+            key={qi}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: qi * 0.05, duration: 0.3 }}
+            className="bg-white border border-forest-100 rounded-2xl p-5"
+          >
             <p className="font-medium text-ink mb-3">{qi + 1}. {q.question}</p>
             <div className="space-y-2">
               {q.options.map((opt, oi) => (
@@ -134,19 +144,21 @@ export default function Exam() {
                 </label>
               ))}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
-      <button
+      <motion.button
         onClick={handleSubmit}
         disabled={submitting}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         className="w-full mt-8 bg-forest-700 text-white py-3 rounded-full font-medium disabled:opacity-60"
       >
         {submitting ? 'Submitting...' : 'Submit exam'}
-      </button>
+      </motion.button>
     </div>
   );
 }

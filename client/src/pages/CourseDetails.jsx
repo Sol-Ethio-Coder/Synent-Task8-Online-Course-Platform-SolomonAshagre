@@ -117,28 +117,34 @@ export default function CourseDetails() {
             <p className="text-xs text-ink/50 mt-1">We'll review it and activate your course shortly.</p>
           </div>
         ) : course.isFree || course.price === 0 ? (
-          <button
+          <motion.button
             onClick={handleChapaEnroll}
             disabled={enrolling}
-            className="w-full mt-6 bg-forest-700 text-white py-3 rounded-full font-medium hover:bg-forest-600 transition-colors disabled:opacity-60"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full mt-6 bg-forest-700 text-white py-3 rounded-full font-medium disabled:opacity-60"
           >
             {enrolling ? 'Enrolling...' : 'Enroll Now'}
-          </button>
+          </motion.button>
         ) : (
           <div className="mt-6 space-y-2.5">
-            <button
+            <motion.button
               onClick={handleChapaEnroll}
               disabled={enrolling}
-              className="w-full bg-forest-700 text-white py-3 rounded-full font-medium hover:bg-forest-600 transition-colors disabled:opacity-60"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="w-full bg-forest-700 text-white py-3 rounded-full font-medium disabled:opacity-60"
             >
               {enrolling ? 'Redirecting to checkout...' : 'Pay with Chapa'}
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleManualClick}
-              className="w-full border border-forest-700 text-forest-700 py-3 rounded-full font-medium hover:bg-forest-50 transition-colors"
+              whileHover={{ scale: 1.03, backgroundColor: 'rgba(31,75,63,0.04)' }}
+              whileTap={{ scale: 0.97 }}
+              className="w-full border border-forest-700 text-forest-700 py-3 rounded-full font-medium"
             >
               Pay via bank / mobile transfer
-            </button>
+            </motion.button>
           </div>
         )}
 

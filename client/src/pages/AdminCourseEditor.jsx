@@ -309,9 +309,9 @@ export default function AdminCourseEditor() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-lg">Modules & lessons</h2>
-            <button type="button" onClick={addModule} className="text-sm text-forest-700 font-medium hover:underline">
+            <motion.button type="button" onClick={addModule} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-sm text-forest-700 font-medium hover:underline">
               + Add module
-            </button>
+            </motion.button>
           </div>
 
           <div className="space-y-5">
@@ -324,9 +324,9 @@ export default function AdminCourseEditor() {
                     onChange={(e) => updateModule(mi, 'title', e.target.value)}
                     className="flex-1 border border-forest-100 rounded-lg px-3 py-2 text-sm font-medium"
                   />
-                  <button type="button" onClick={() => removeModule(mi)} className="text-red-600 text-sm">
+                  <motion.button type="button" onClick={() => removeModule(mi)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-red-600 text-sm hover:underline">
                     Remove
-                  </button>
+                  </motion.button>
                 </div>
 
                 <div className="mt-4 space-y-3 pl-4 border-l-2 border-forest-50">
@@ -351,14 +351,14 @@ export default function AdminCourseEditor() {
                         onChange={(e) => updateLesson(mi, li, 'duration', e.target.value)}
                         className="border border-forest-100 rounded-lg px-3 py-2 text-sm"
                       />
-                      <button type="button" onClick={() => removeLesson(mi, li)} className="text-red-600 text-xs">
+                      <motion.button type="button" onClick={() => removeLesson(mi, li)} whileHover={{ scale: 1.25 }} whileTap={{ scale: 0.9 }} className="text-red-600 text-xs">
                         ✕
-                      </button>
+                      </motion.button>
                     </div>
                   ))}
-                  <button type="button" onClick={() => addLesson(mi)} className="text-xs text-forest-700 font-medium hover:underline">
+                  <motion.button type="button" onClick={() => addLesson(mi)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-xs text-forest-700 font-medium hover:underline">
                     + Add lesson
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             ))}
@@ -372,17 +372,19 @@ export default function AdminCourseEditor() {
               <p className="text-xs text-ink/50 mt-0.5">Passing this unlocks the certificate for enrolled students.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button
+              <motion.button
                 type="button"
                 onClick={handleGenerateExam}
                 disabled={generatingExam}
-                className="text-sm bg-forest-50 text-forest-700 border border-forest-200 px-3 py-1.5 rounded-full font-medium hover:bg-forest-100 disabled:opacity-60 whitespace-nowrap"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-sm bg-forest-50 text-forest-700 border border-forest-200 px-3 py-1.5 rounded-full font-medium disabled:opacity-60 whitespace-nowrap"
               >
                 {generatingExam ? 'Generating...' : '✨ Generate with AI'}
-              </button>
-              <button type="button" onClick={addExamQuestion} className="text-sm text-forest-700 font-medium hover:underline whitespace-nowrap">
+              </motion.button>
+              <motion.button type="button" onClick={addExamQuestion} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-sm text-forest-700 font-medium hover:underline whitespace-nowrap">
                 + Add question
-              </button>
+              </motion.button>
             </div>
           </div>
           {examGenError && <p className="text-sm text-red-600 mb-4">{examGenError}</p>}
@@ -413,9 +415,9 @@ export default function AdminCourseEditor() {
                       rows={2}
                       className="flex-1 border border-forest-100 rounded-lg px-3 py-2 text-sm"
                     />
-                    <button type="button" onClick={() => removeExamQuestion(qi)} className="text-red-600 text-sm whitespace-nowrap">
+                    <motion.button type="button" onClick={() => removeExamQuestion(qi)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-red-600 text-sm whitespace-nowrap hover:underline">
                       Remove
-                    </button>
+                    </motion.button>
                   </div>
 
                   <div className="mt-3 space-y-2">

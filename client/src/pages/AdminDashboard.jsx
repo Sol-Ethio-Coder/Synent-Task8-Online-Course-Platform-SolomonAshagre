@@ -110,9 +110,11 @@ export default function AdminDashboard() {
 
       <div className="flex gap-2 mt-8 border-b border-forest-100 overflow-x-auto">
         {[...BASE_TABS, 'Pending Payments'].map((t) => (
-          <button
+          <motion.button
             key={t}
             onClick={() => setTab(t)}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.96 }}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               tab === t ? 'border-forest-700 text-forest-700' : 'border-transparent text-ink/50 hover:text-ink/80'
             }`}
@@ -123,7 +125,7 @@ export default function AdminDashboard() {
                 {pendingPayments.length}
               </span>
             )}
-          </button>
+          </motion.button>
         ))}
       </div>
 
@@ -158,7 +160,14 @@ export default function AdminDashboard() {
                       <td className="py-3 pr-4 text-ink/60">{c.published ? 'Yes' : 'Draft'}</td>
                       <td className="py-3 pr-4 flex gap-3">
                         <Link to={`/admin/courses/${c._id}`} className="text-forest-700 hover:underline">Edit</Link>
-                        <button onClick={() => handleDelete(c._id)} className="text-red-600 hover:underline">Delete</button>
+                        <motion.button
+                          whileHover={{ scale: 1.08 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleDelete(c._id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </motion.button>
                       </td>
                     </tr>
                   ))}
@@ -293,20 +302,24 @@ export default function AdminDashboard() {
                           Submitted {new Date(p.createdAt).toLocaleString()}
                         </p>
                         <div className="flex gap-3 mt-3">
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => handleApprove(p._id)}
                             disabled={reviewingId === p._id}
                             className="bg-forest-700 text-white px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
                           >
                             {reviewingId === p._id ? 'Working...' : 'Approve'}
-                          </button>
-                          <button
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => handleReject(p._id)}
                             disabled={reviewingId === p._id}
                             className="border border-red-300 text-red-600 px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
                           >
                             Reject
-                          </button>
+                          </motion.button>
                         </div>
                       </div>
                     </div>
@@ -340,13 +353,15 @@ export default function AdminDashboard() {
                       className="w-full border border-forest-100 rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
-                  <button
+                  <motion.button
                     type="submit"
                     disabled={addingImage}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     className="bg-forest-700 text-white px-5 py-2 rounded-lg text-sm font-medium disabled:opacity-60 whitespace-nowrap"
                   >
                     {addingImage ? 'Adding...' : 'Add photo'}
-                  </button>
+                  </motion.button>
                 </div>
                 {imageError && <p className="text-sm text-red-600 mt-2">{imageError}</p>}
                 <p className="text-xs text-ink/40 mt-2">
@@ -363,12 +378,14 @@ export default function AdminDashboard() {
                       <img src={img.url} alt={img.caption || 'Tutoring'} className="w-full h-32 object-cover" />
                       <div className="p-2.5">
                         <p className="text-xs text-ink/60 truncate">{img.caption || '—'}</p>
-                        <button
+                        <motion.button
                           onClick={() => handleDeleteImage(img._id)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           className="text-xs text-red-600 hover:underline mt-1"
                         >
                           Remove
-                        </button>
+                        </motion.button>
                       </div>
                     </div>
                   ))}
