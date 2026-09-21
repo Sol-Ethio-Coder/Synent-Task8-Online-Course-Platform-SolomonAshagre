@@ -10,6 +10,27 @@ const BADGES = {
   five_courses: { icon: '⭐', label: 'Enrolled in 5+ courses' }
 };
 
+// XP economy: small, frequent rewards for lessons; a bigger one-time reward
+// for passing an exam (scaled by score, so a stronger result earns more).
+// Awarded only on first completion/first pass — no farming via re-clicking
+// an already-done lesson or retaking an already-passed exam.
+const XP_PER_LESSON = 10;
+const XP_EXAM_BASE = 50;
+const XP_PER_LEVEL = 100;
+
+function awardXP(user, amount) {
+  user.xp = (user.xp || 0) + amount;
+}
+
+// Simple flat curve: 100 XP per level. Kept in one place so the dashboard
+// and any future feature compute levels identically.
+function getLevelInfo(xp) {
+  const total = xp || 0;
+  const level = Math.floor(total / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = total % XP_PER_LEVEL;
+  return { level, xpIntoLevel, xpForNextLevel: XP_PER_LEVEL };
+}
+
 /**
  * Updates a user's learning streak based on today's activity, and awards
  * any newly-earned badges. Mutates the user document in place — caller is
@@ -50,4 +71,4 @@ function awardBadge(user, key) {
   if (!user.badges.includes(key)) user.badges.push(key);
 }
 
-module.exports = { BADGES, updateStreakAndBadges, awardBadge };
+module.exports = { BADGES, updateStreakAndBadges, awardBadge, awardXP, getLevelInfo, XP_PER_LESSON, XP_EXAM_BASE, XP_PER_LEVEL };

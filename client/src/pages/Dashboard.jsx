@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import api from '../api/axios.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import ProgressBar from '../components/ProgressBar.jsx';
+import PathwayJourney from '../components/PathwayJourney.jsx';
 
 const BADGE_INFO = {
   first_lesson: { icon: '🎯', label: 'First lesson complete' },
@@ -15,11 +16,17 @@ const BADGE_INFO = {
   five_courses: { icon: '⭐', label: '5+ courses enrolled' }
 };
 
+const XP_PER_LEVEL = 100;
+// Ranks stages so a student with multiple courses in the same curriculum
+// shows their BEST status there, not whichever enrollment happened to be
+// checked last.
+const STATUS_RANK = { 'not-started': 0, 'in-progress': 1, completed: 2 };
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
   const [pending, setPending] = useState([]);
-  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, badges: [] });
+  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, badges: [], xp: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,11 +37,28 @@ export default function Dashboard() {
         setStreak({
           currentStreak: meRes.data.currentStreak || 0,
           longestStreak: meRes.data.longestStreak || 0,
-          badges: meRes.data.badges || []
+          badges: meRes.data.badges || [],
+          xp: meRes.data.xp || 0
         });
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const level = Math.floor(streak.xp / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = streak.xp % XP_PER_LEVEL;
+
+  // Build { curriculumKey: 'not-started' | 'in-progress' | 'completed' }
+  // from the student's real enrollments, for the personalized PathwayJourney.
+  const progressByStage = {};
+  enrollments.forEach((enr) => {
+    const curriculum = enr.course?.curriculum;
+    if (!curriculum || curriculum === 'General') return;
+    const status = enr.examPassed ? 'completed' : enr.progressPercent > 0 ? 'in-progress' : 'not-started';
+    if (!progressByStage[curriculum] || STATUS_RANK[status] > STATUS_RANK[progressByStage[curriculum]]) {
+      progressByStage[curriculum] = status;
+    }
+  });
+  const hasCurriculumProgress = Object.keys(progressByStage).length > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-14">
@@ -47,7 +71,7 @@ export default function Dashboard() {
       </motion.h1>
       <p className="text-ink/60 mt-2">Pick up where you left off.</p>
 
-      {!loading && (streak.currentStreak > 0 || streak.badges.length > 0) && (
+      {!loading && (streak.currentStreak > 0 || streak.badges.length > 0 || streak.xp > 0) && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,6 +85,23 @@ export default function Dashboard() {
               <p className="text-xs text-white/60">Current streak · best: {streak.longestStreak}</p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 min-w-[140px]">
+            <span className="text-2xl">✨</span>
+            <div className="flex-1">
+              <p className="font-display font-semibold text-lg leading-none">Level {level}</p>
+              <div className="w-28 h-1.5 bg-white/15 rounded-full mt-1.5 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${xpIntoLevel}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="h-full bg-sun-400 rounded-full"
+                />
+              </div>
+              <p className="text-[11px] text-white/60 mt-1">{xpIntoLevel} / {XP_PER_LEVEL} XP · {streak.xp} total</p>
+            </div>
+          </div>
+
           {streak.badges.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               {streak.badges.map((key) => {
@@ -79,6 +120,19 @@ export default function Dashboard() {
               })}
             </div>
           )}
+        </motion.div>
+      )}
+
+      {!loading && hasCurriculumProgress && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-6 bg-white border border-forest-100 rounded-2xl p-6"
+        >
+          <h2 className="font-display font-semibold text-lg text-ink mb-1">Your learning journey</h2>
+          <p className="text-xs text-ink/50 mb-2">How far you've come across each curriculum track.</p>
+          <PathwayJourney progressByStage={progressByStage} />
         </motion.div>
       )}
 

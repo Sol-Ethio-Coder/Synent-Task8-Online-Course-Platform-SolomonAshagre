@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
 const Course = require('../models/Course');
 const User = require('../models/User');
-const { awardBadge } = require('../utils/badges');
+const { awardBadge, awardXP, XP_EXAM_BASE } = require('../utils/badges');
 
 function findEnrollment(user, courseId) {
   return user.enrolledCourses.find((e) => e.course.toString() === courseId);
@@ -92,6 +92,10 @@ const submitExam = asyncHandler(async (req, res) => {
       .toString('hex')}`.toUpperCase();
     enrollment.certificateIssuedAt = new Date();
     awardBadge(user, 'first_certificate');
+    // XP scales with score — a stronger result earns more, but this only
+    // fires once per course (first pass), so retaking an already-passed
+    // exam for a better score doesn't farm extra XP.
+    awardXP(user, XP_EXAM_BASE + score);
   } else if (passed) {
     enrollment.examPassed = true; // already had a certificate, just re-confirm status
   }
@@ -104,7 +108,8 @@ const submitExam = asyncHandler(async (req, res) => {
     totalQuestions: total,
     passed,
     certificateId: enrollment.examPassed ? enrollment.certificateId : null,
-    newBadges: user.badges
+    newBadges: user.badges,
+    xp: user.xp
   });
 });
 

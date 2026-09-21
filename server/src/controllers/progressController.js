@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const Course = require('../models/Course');
-const { updateStreakAndBadges, awardBadge } = require('../utils/badges');
+const { updateStreakAndBadges, awardBadge, awardXP, XP_PER_LESSON } = require('../utils/badges');
 
 // @route POST /api/progress/:courseId/lessons/:lessonId/complete
 const markLessonComplete = asyncHandler(async (req, res) => {
@@ -18,6 +18,7 @@ const markLessonComplete = asyncHandler(async (req, res) => {
   const alreadyDone = enrollment.completedLessons.some((id) => id.toString() === lessonId);
   if (!alreadyDone) {
     enrollment.completedLessons.push(lessonId);
+    awardXP(user, XP_PER_LESSON);
   }
 
   const course = await Course.findById(courseId);
@@ -35,7 +36,8 @@ const markLessonComplete = asyncHandler(async (req, res) => {
     completedLessons: enrollment.completedLessons,
     progressPercent: enrollment.progressPercent,
     currentStreak: user.currentStreak,
-    newBadges: user.badges
+    newBadges: user.badges,
+    xp: user.xp
   });
 });
 
