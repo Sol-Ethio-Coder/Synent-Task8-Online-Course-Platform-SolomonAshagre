@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -21,11 +21,18 @@ import Learn from './pages/Learn.jsx';
 import Exam from './pages/Exam.jsx';
 import Certificate from './pages/Certificate.jsx';
 import VerifyCertificate from './pages/VerifyCertificate.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import AdminCourseEditor from './pages/AdminCourseEditor.jsx';
 import Policy from './pages/Policy.jsx';
 import Terms from './pages/Terms.jsx';
 import NotFound from './pages/NotFound.jsx';
+
+// Admin-only pages are code-split — recharts (used for analytics) and this
+// entire surface only needs to load for the one admin, not every visitor.
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
+const AdminCourseEditor = lazy(() => import('./pages/AdminCourseEditor.jsx'));
+
+const AdminPageFallback = () => (
+  <div className="max-w-6xl mx-auto px-5 py-20 text-center text-ink/40">Loading admin panel...</div>
+);
 
 export default function App() {
   return (
@@ -55,9 +62,36 @@ export default function App() {
           <Route path="/exam/:courseId" element={<ProtectedRoute><Exam /></ProtectedRoute>} />
           <Route path="/certificate/:courseId" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
 
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/courses/:id" element={<AdminRoute><AdminCourseEditor /></AdminRoute>} />
-          <Route path="/admin/courses/new" element={<AdminRoute><AdminCourseEditor /></AdminRoute>} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Suspense fallback={<AdminPageFallback />}>
+                  <AdminDashboard />
+                </Suspense>
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/courses/:id"
+            element={
+              <AdminRoute>
+                <Suspense fallback={<AdminPageFallback />}>
+                  <AdminCourseEditor />
+                </Suspense>
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/courses/new"
+            element={
+              <AdminRoute>
+                <Suspense fallback={<AdminPageFallback />}>
+                  <AdminCourseEditor />
+                </Suspense>
+              </AdminRoute>
+            }
+          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -69,6 +69,7 @@ stca-platform/
 **Learning system**
 - Modules → lessons structure
 - Video playback (embed URL per lesson — YouTube/Vimeo/hosted)
+- Previous/Next navigation between lessons, moving seamlessly across module boundaries — the "Next" button becomes "Take final exam" or "View certificate" once the last lesson is reached
 - Mark lessons complete
 - Progress % automatically calculated and displayed
 - **AI explanations & practice quizzes** (free, via Groq) — if a video won't play, or a student just wants a written explanation, they can generate an AI explanation plus 3 multiple-choice practice questions for any lesson with one click. Generated once per lesson, then cached in MongoDB — every future student sees the same cached content instantly, at zero extra API cost
@@ -89,10 +90,16 @@ stca-platform/
 
 **Extras requested**
 - Favicon and logo — the founder's actual uploaded logo image (`client/public/logo.png`), not a redrawn recreation, used site-wide (navbar, footer, homepage hero, About page, certificates) with a hover-pop + slow glow-pulse effect
+- An animated moving gradient background behind the homepage hero — several large, softly blurred color blobs drifting on independent loops. Fully CSS/Framer-Motion, no video file or stock photo needed
 - Framer Motion animations and hover effects across every page — entrance transitions, button hover/tap feedback, animated status transitions — not just the homepage
 - Privacy Policy and Terms of Service pages (Chapa/ETB-aware)
 - Developer credit in the footer, linking to [Solomon Ashagre's portfolio](https://sol-ethio-coder.netlify.app/)
 - **Homepage AI chatbot** — a floating chat widget (bottom-right, 💬) lets visitors ask about courses, pricing, and enrollment before signing up, powered by the same free Groq API. Public endpoint, stateless, rate-limited to 30 requests/15min per IP since it has no login in front of it
+
+**Engagement & trust**
+- **Learning streaks + badges** — daily activity streak (current + longest) tracked automatically on lesson completion and login, shown on the student dashboard. Badges for milestones (3/7/30-day streaks, first lesson, first certificate, completing a course, enrolling in 5+ courses) — badge keys live in `server/src/utils/badges.js` so labels/icons can change without a data migration
+- **Course ratings & reviews** — enrolled students leave a 1–5 star rating + optional comment per course (one per student, editable). Average rating and count are recomputed and cached on the `Course` document itself for fast display on `CourseCard` and `CourseDetails`, rather than aggregating on every page load
+- **Admin analytics dashboard** — a dedicated "Analytics" tab (now the default landing tab in `/admin`) showing total revenue, student count, certificates issued, exam pass rate, a 6-month revenue bar chart (via `recharts`), and top 5 courses by enrollment. This page is **code-split** (`React.lazy` + `Suspense` in `App.jsx`) so `recharts` and the whole admin surface never ship to regular student visitors — only loads when an actual admin visits `/admin`
 
 ## 💳 How the Chapa payment flow works
 

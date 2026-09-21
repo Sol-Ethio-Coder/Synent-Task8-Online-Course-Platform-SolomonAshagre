@@ -5,6 +5,7 @@ import api from '../api/axios.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import ManualPaymentModal from '../components/ManualPaymentModal.jsx';
 import CourseThumbnail from '../components/CourseThumbnail.jsx';
+import StarRating from '../components/StarRating.jsx';
 
 export default function CourseDetails() {
   const { slug } = useParams();
@@ -16,9 +17,28 @@ export default function CourseDetails() {
   const [showManualModal, setShowManualModal] = useState(false);
   const [submittedForReview, setSubmittedForReview] = useState(false);
 
+  const [reviews, setReviews] = useState([]);
+  const [myRating, setMyRating] = useState(0);
+  const [myComment, setMyComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSaved, setReviewSaved] = useState(false);
+
   useEffect(() => {
     api.get(`/courses/${slug}`).then((res) => setCourse(res.data)).catch(() => setError('Course not found'));
   }, [slug]);
+
+  useEffect(() => {
+    if (!course?._id) return;
+    api.get(`/courses/${course._id}/reviews`).then((res) => {
+      setReviews(res.data);
+      const mine = user && res.data.find((r) => r.user?._id === user._id);
+      if (mine) {
+        setMyRating(mine.rating);
+        setMyComment(mine.comment || '');
+      }
+    });
+  }, [course?._id, user]);
 
   const handleChapaEnroll = async () => {
     if (!user) {
@@ -52,6 +72,31 @@ export default function CourseDetails() {
     setShowManualModal(true);
   };
 
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (myRating === 0) {
+      setReviewError('Pick a star rating first.');
+      return;
+    }
+    setReviewError('');
+    setSubmittingReview(true);
+    try {
+      await api.post(`/courses/${course._id}/reviews`, { rating: myRating, comment: myComment });
+      setReviewSaved(true);
+      const { data } = await api.get(`/courses/${course._id}/reviews`);
+      setReviews(data);
+      setTimeout(() => setReviewSaved(false), 2500);
+    } catch (err) {
+      setReviewError(err.response?.data?.message || 'Could not save your review.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   if (error && !course) {
     return <div className="max-w-3xl mx-auto px-5 py-20 text-center text-ink/60">{error}</div>;
   }
@@ -74,9 +119,17 @@ export default function CourseDetails() {
           )}
         </div>
 
-        <span className="text-xs font-medium text-forest-600 bg-forest-50 px-2 py-1 rounded-full capitalize">
-          {course.category.replace('-', ' · ')}
-        </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-medium text-forest-600 bg-forest-50 px-2 py-1 rounded-full capitalize">
+            {course.category.replace('-', ' · ')}
+          </span>
+          {course.reviewCount > 0 && (
+            <span className="flex items-center gap-1.5 text-sm text-ink/60">
+              <StarRating value={course.avgRating} />
+              <span>{course.avgRating.toFixed(1)} ({course.reviewCount} review{course.reviewCount !== 1 ? 's' : ''})</span>
+            </span>
+          )}
+        </div>
         <h1 className="text-3xl font-display font-semibold text-ink mt-4">{course.title}</h1>
         <p className="text-ink/70 mt-4 leading-relaxed">{course.description}</p>
 
@@ -96,6 +149,58 @@ export default function CourseDetails() {
             </div>
           ))}
         </div>
+
+        <h2 className="font-display font-semibold text-xl mt-10 mb-4">Reviews</h2>
+
+        {user && (
+          <form onSubmit={handleSubmitReview} className="bg-white border border-forest-100 rounded-2xl p-5 mb-6">
+            <p className="text-sm font-medium text-ink mb-2">
+              {myRating > 0 ? 'Update your review' : 'Leave a review'}
+            </p>
+            <StarRating value={myRating} onChange={setMyRating} size="text-2xl" />
+            <textarea
+              value={myComment}
+              onChange={(e) => setMyComment(e.target.value)}
+              placeholder="What did you think of this course? (optional)"
+              rows={2}
+              maxLength={1000}
+              className="w-full mt-3 border border-forest-100 rounded-lg px-3 py-2 text-sm"
+            />
+            {reviewError && <p className="text-sm text-red-600 mt-2">{reviewError}</p>}
+            <motion.button
+              type="submit"
+              disabled={submittingReview}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="mt-3 bg-forest-700 text-white px-5 py-2 rounded-full text-sm font-medium disabled:opacity-60"
+            >
+              {submittingReview ? 'Saving...' : reviewSaved ? 'Saved ✓' : 'Submit review'}
+            </motion.button>
+            <p className="text-xs text-ink/40 mt-2">You must be enrolled in this course to leave a review.</p>
+          </form>
+        )}
+
+        {reviews.length === 0 ? (
+          <p className="text-sm text-ink/40">No reviews yet — be the first!</p>
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((r) => (
+              <motion.div
+                key={r._id}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="border border-forest-100 rounded-xl p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-ink">{r.user?.name || 'Anonymous'}</p>
+                  <StarRating value={r.rating} />
+                </div>
+                {r.comment && <p className="text-sm text-ink/65 mt-2">{r.comment}</p>}
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
 
       <motion.div

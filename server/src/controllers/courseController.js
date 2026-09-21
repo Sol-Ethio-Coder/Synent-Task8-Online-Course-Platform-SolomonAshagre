@@ -13,7 +13,7 @@ const getCourses = asyncHandler(async (req, res) => {
   if (search) filter.$text = { $search: search };
 
   const courses = await Course.find(filter)
-    .select('title slug shortDescription thumbnail category curriculum level price isFree')
+    .select('title slug shortDescription thumbnail category curriculum level price isFree avgRating reviewCount')
     .sort({ createdAt: -1 });
 
   res.json(courses);

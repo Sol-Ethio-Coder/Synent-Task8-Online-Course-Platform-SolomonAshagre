@@ -5,17 +5,33 @@ import api from '../api/axios.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import ProgressBar from '../components/ProgressBar.jsx';
 
+const BADGE_INFO = {
+  first_lesson: { icon: '🎯', label: 'First lesson complete' },
+  streak_3: { icon: '🔥', label: '3-day streak' },
+  streak_7: { icon: '🔥', label: '7-day streak' },
+  streak_30: { icon: '🔥', label: '30-day streak' },
+  first_certificate: { icon: '🏅', label: 'First certificate' },
+  course_complete: { icon: '🎓', label: 'Course completed' },
+  five_courses: { icon: '⭐', label: '5+ courses enrolled' }
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
   const [pending, setPending] = useState([]);
+  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, badges: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get('/enrollments/my-courses'), api.get('/enrollments/my-pending')])
-      .then(([enrRes, pendingRes]) => {
+    Promise.all([api.get('/enrollments/my-courses'), api.get('/enrollments/my-pending'), api.get('/auth/me')])
+      .then(([enrRes, pendingRes, meRes]) => {
         setEnrollments(enrRes.data);
         setPending(pendingRes.data);
+        setStreak({
+          currentStreak: meRes.data.currentStreak || 0,
+          longestStreak: meRes.data.longestStreak || 0,
+          badges: meRes.data.badges || []
+        });
       })
       .finally(() => setLoading(false));
   }, []);
@@ -30,6 +46,41 @@ export default function Dashboard() {
         Welcome back, {user?.name?.split(' ')[0]}
       </motion.h1>
       <p className="text-ink/60 mt-2">Pick up where you left off.</p>
+
+      {!loading && (streak.currentStreak > 0 || streak.badges.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mt-6 bg-forest-700 text-white rounded-2xl p-5 flex flex-wrap items-center gap-6"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🔥</span>
+            <div>
+              <p className="font-display font-semibold text-lg leading-none">{streak.currentStreak} day{streak.currentStreak !== 1 ? 's' : ''}</p>
+              <p className="text-xs text-white/60">Current streak · best: {streak.longestStreak}</p>
+            </div>
+          </div>
+          {streak.badges.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {streak.badges.map((key) => {
+                const b = BADGE_INFO[key];
+                if (!b) return null;
+                return (
+                  <motion.span
+                    key={key}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    title={b.label}
+                    className="bg-white/10 text-sm px-2.5 py-1 rounded-full flex items-center gap-1 cursor-default"
+                  >
+                    {b.icon} <span className="hidden sm:inline">{b.label}</span>
+                  </motion.span>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {loading ? (
         <p className="text-ink/50 mt-10">Loading your courses...</p>
@@ -67,9 +118,11 @@ export default function Dashboard() {
           {enrollments.length === 0 && pending.length === 0 ? (
             <div className="mt-12 bg-forest-50 border border-forest-100 rounded-2xl p-10 text-center">
               <p className="text-ink/70">You haven't enrolled in any courses yet.</p>
-              <Link to="/courses" className="inline-block mt-4 bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium">
-                Browse courses
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="inline-block mt-4">
+                <Link to="/courses" className="inline-block bg-forest-700 text-white px-6 py-2.5 rounded-full font-medium">
+                  Browse courses
+                </Link>
+              </motion.div>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
@@ -79,6 +132,7 @@ export default function Dashboard() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
+                  whileHover={{ y: -3 }}
                   className="bg-white border border-forest-100 rounded-2xl p-6"
                 >
                   <h3 className="font-display font-semibold text-lg text-ink">{enr.course?.title}</h3>

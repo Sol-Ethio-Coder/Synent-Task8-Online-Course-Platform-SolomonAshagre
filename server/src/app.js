@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -68,6 +69,7 @@ app.use('/api/ai/chat', chatLimiter);
 app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'STCA API' }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', reviewRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/progress', progressRoutes);

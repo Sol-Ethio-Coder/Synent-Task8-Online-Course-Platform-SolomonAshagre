@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CourseThumbnail from './CourseThumbnail.jsx';
+import StarRating from './StarRating.jsx';
 
 const categoryLabels = {
   'coding-online': 'Coding · Online',
@@ -39,6 +40,12 @@ export default function CourseCard({ course }) {
             )}
           </div>
           <h3 className="font-display font-semibold text-lg mt-3 text-ink">{course.title}</h3>
+          {course.reviewCount > 0 && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <StarRating value={course.avgRating} size="text-xs" />
+              <span className="text-xs text-ink/50">({course.reviewCount})</span>
+            </div>
+          )}
           <p className="text-sm text-ink/60 mt-1 line-clamp-2">{course.shortDescription}</p>
           <div className="mt-4 flex items-center justify-between">
             <span className="font-semibold text-forest-700">

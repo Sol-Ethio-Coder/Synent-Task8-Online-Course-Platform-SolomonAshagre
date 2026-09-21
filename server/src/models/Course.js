@@ -69,6 +69,12 @@ const courseSchema = new mongoose.Schema(
       passingScorePercent: { type: Number, default: 70 }
     },
 
+    // Denormalized rating summary — recomputed whenever a review is
+    // added/updated, so course listing pages can show a star rating without
+    // a separate aggregation query per card.
+    avgRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
   { timestamps: true }

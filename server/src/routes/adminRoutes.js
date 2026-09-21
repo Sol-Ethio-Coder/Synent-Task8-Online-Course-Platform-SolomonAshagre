@@ -16,6 +16,7 @@ const {
   getExamResults
 } = require('../controllers/adminController');
 const { addTutoringImage, deleteTutoringImage } = require('../controllers/tutoringController');
+const { getAnalytics } = require('../controllers/analyticsController');
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.post('/generate-exam', generateExam);
 router.get('/users', getAllUsers);
 router.get('/enrollments', getAllEnrollments);
 router.get('/exam-results', getExamResults);
+router.get('/analytics', getAnalytics);
 
 router.get('/pending-enrollments', getPendingEnrollments);
 router.post('/enrollments/:id/approve', approveEnrollment);

@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
 const Course = require('../models/Course');
 const User = require('../models/User');
+const { awardBadge } = require('../utils/badges');
 
 function findEnrollment(user, courseId) {
   return user.enrolledCourses.find((e) => e.course.toString() === courseId);
@@ -90,6 +91,7 @@ const submitExam = asyncHandler(async (req, res) => {
       .randomBytes(3)
       .toString('hex')}`.toUpperCase();
     enrollment.certificateIssuedAt = new Date();
+    awardBadge(user, 'first_certificate');
   } else if (passed) {
     enrollment.examPassed = true; // already had a certificate, just re-confirm status
   }
@@ -101,7 +103,8 @@ const submitExam = asyncHandler(async (req, res) => {
     correctCount,
     totalQuestions: total,
     passed,
-    certificateId: enrollment.examPassed ? enrollment.certificateId : null
+    certificateId: enrollment.examPassed ? enrollment.certificateId : null,
+    newBadges: user.badges
   });
 });
 

@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpires: Date,
 
+    // Engagement: learning streaks + earned badges
+    currentStreak: { type: Number, default: 0 },
+    longestStreak: { type: Number, default: 0 },
+    lastActivityDate: { type: Date },
+    badges: [{ type: String }], // badge keys, see utils/badges.js
+
     enrolledCourses: [
       {
         course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },

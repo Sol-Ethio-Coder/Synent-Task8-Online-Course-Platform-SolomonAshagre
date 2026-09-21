@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api/axios.js';
 
-const BASE_TABS = ['Courses', 'Users', 'Enrollments', 'Exam Results', 'Tutoring Photos'];
+const BASE_TABS = ['Analytics', 'Courses', 'Users', 'Enrollments', 'Exam Results', 'Tutoring Photos'];
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('Courses');
+  const [tab, setTab] = useState('Analytics');
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [images, setImages] = useState([]);
   const [pendingPayments, setPendingPayments] = useState([]);
   const [examResults, setExamResults] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [imageForm, setImageForm] = useState({ url: '', caption: '' });
   const [addingImage, setAddingImage] = useState(false);
   const [imageError, setImageError] = useState('');
@@ -21,13 +23,14 @@ export default function AdminDashboard() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, u, e, img, pending, results] = await Promise.all([
+    const [c, u, e, img, pending, results, stats] = await Promise.all([
       api.get('/admin/courses'),
       api.get('/admin/users'),
       api.get('/admin/enrollments'),
       api.get('/tutoring/images'),
       api.get('/admin/pending-enrollments'),
-      api.get('/admin/exam-results')
+      api.get('/admin/exam-results'),
+      api.get('/admin/analytics')
     ]);
     setCourses(c.data);
     setUsers(u.data);
@@ -35,6 +38,7 @@ export default function AdminDashboard() {
     setImages(img.data);
     setPendingPayments(pending.data);
     setExamResults(results.data);
+    setAnalytics(stats.data);
     setLoading(false);
   };
 
@@ -139,6 +143,69 @@ export default function AdminDashboard() {
           transition={{ duration: 0.3 }}
           className="mt-8"
         >
+          {tab === 'Analytics' && analytics && (
+            <div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {[
+                  { label: 'Total revenue', value: `${analytics.totalRevenue.toLocaleString()} ETB`, color: 'text-forest-700' },
+                  { label: 'Students', value: analytics.totalStudents, color: 'text-ink' },
+                  { label: 'Certificates issued', value: analytics.certificatesIssued, color: 'text-sun-500' },
+                  { label: 'Exam pass rate', value: `${analytics.examPassRate}%`, color: 'text-ink' }
+                ].map((stat, i) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="bg-white border border-forest-100 rounded-2xl p-5"
+                  >
+                    <p className="text-xs text-ink/50">{stat.label}</p>
+                    <p className={`text-2xl font-display font-semibold mt-1 ${stat.color}`}>{stat.value}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="bg-white border border-forest-100 rounded-2xl p-5 mb-8">
+                <h3 className="font-display font-semibold text-ink mb-4">Revenue — last 6 months</h3>
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={analytics.monthly}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#dcebe1" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value, name) => [name === 'revenue' ? `${value.toLocaleString()} ETB` : value, name === 'revenue' ? 'Revenue' : 'Enrollments']}
+                    />
+                    <Bar dataKey="revenue" fill="#1F4B3F" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white border border-forest-100 rounded-2xl p-5">
+                <h3 className="font-display font-semibold text-ink mb-4">Top courses by enrollment</h3>
+                {analytics.topCourses.length === 0 ? (
+                  <p className="text-sm text-ink/40">No paid enrollments yet.</p>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-ink/50 border-b border-forest-100">
+                        <th className="py-2 pr-4">Course</th>
+                        <th className="py-2 pr-4">Enrollments</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.topCourses.map((c) => (
+                        <tr key={c.title} className="border-b border-forest-50">
+                          <td className="py-2 pr-4 font-medium text-ink">{c.title}</td>
+                          <td className="py-2 pr-4 text-ink/60">{c.enrollments}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
           {tab === 'Courses' && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
