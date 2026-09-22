@@ -160,9 +160,11 @@ export default function Dashboard() {
                     </p>
                   </div>
                   {p.status === 'rejected' && (
-                    <Link to={`/courses`} className="text-xs font-medium text-forest-700 hover:underline whitespace-nowrap">
-                      Try again
-                    </Link>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-shrink-0">
+                      <Link to={`/courses`} className="text-xs font-medium text-forest-700 hover:underline whitespace-nowrap">
+                        Try again
+                      </Link>
+                    </motion.div>
                   )}
                 </div>
               ))}

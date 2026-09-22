@@ -10,10 +10,10 @@ import { motion } from 'framer-motion';
  */
 export default function MovingBackground() {
   const blobs = [
-    { color: '#22C55E', size: 420, top: '-10%', left: '-8%', duration: 22 },
-    { color: '#F59E0B', size: 380, top: '5%', left: '55%', duration: 26 },
-    { color: '#F43F5E', size: 340, top: '55%', left: '5%', duration: 20 },
-    { color: '#0EA5E9', size: 300, top: '45%', left: '70%', duration: 24 }
+    { color: '#22C55E', size: 480, top: '-15%', left: '-10%', duration: 18 },
+    { color: '#F59E0B', size: 440, top: '0%', left: '55%', duration: 22 },
+    { color: '#F43F5E', size: 400, top: '50%', left: '2%', duration: 16 },
+    { color: '#0EA5E9', size: 360, top: '40%', left: '68%', duration: 20 }
   ];
 
   return (
@@ -21,7 +21,7 @@ export default function MovingBackground() {
       {blobs.map((b, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full opacity-[0.16] blur-3xl"
+          className="absolute rounded-full opacity-[0.28] blur-3xl"
           style={{
             width: b.size,
             height: b.size,
@@ -30,9 +30,9 @@ export default function MovingBackground() {
             background: `radial-gradient(circle, ${b.color}, transparent 70%)`
           }}
           animate={{
-            x: [0, 40, -20, 0],
-            y: [0, -30, 20, 0],
-            scale: [1, 1.1, 0.95, 1]
+            x: [0, 70, -40, 0],
+            y: [0, -50, 35, 0],
+            scale: [1, 1.15, 0.9, 1]
           }}
           transition={{
             duration: b.duration,
