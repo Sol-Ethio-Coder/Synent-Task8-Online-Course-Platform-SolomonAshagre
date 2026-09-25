@@ -13,7 +13,8 @@ const {
   getPendingEnrollments,
   approveEnrollment,
   rejectEnrollment,
-  getExamResults
+  getExamResults,
+  deleteUser
 } = require('../controllers/adminController');
 const { addTutoringImage, deleteTutoringImage } = require('../controllers/tutoringController');
 const { getAnalytics } = require('../controllers/analyticsController');
@@ -29,6 +30,7 @@ router.delete('/courses/:id', deleteCourse);
 router.post('/generate-exam', generateExam);
 
 router.get('/users', getAllUsers);
+router.delete('/users/:id', deleteUser);
 router.get('/enrollments', getAllEnrollments);
 router.get('/exam-results', getExamResults);
 router.get('/analytics', getAnalytics);

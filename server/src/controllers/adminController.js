@@ -1,7 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const Enrollment = require('../models/Enrollment');
+const Review = require('../models/Review');
 const { sendEmail, emailTemplates } = require('../utils/sendEmail');
+const { recomputeCourseRating } = require('./reviewController');
 
 // @route GET /api/admin/users
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -107,11 +109,52 @@ const getExamResults = asyncHandler(async (req, res) => {
   res.json(results);
 });
 
+// @route DELETE /api/admin/users/:id
+// Cascade-deletes the user's enrollments and reviews (recomputing affected
+// courses' cached ratings), then the user itself. Admins can't delete their
+// own account this way — that would risk locking themselves out.
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (id === req.user._id.toString()) {
+    res.status(400);
+    throw new Error('You cannot delete your own account while logged in as it');
+  }
+
+  const user = await User.findById(id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (user.role === 'admin') {
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    if (adminCount <= 1) {
+      res.status(400);
+      throw new Error('Cannot delete the last remaining admin account');
+    }
+  }
+
+  const reviews = await Review.find({ user: id }).select('course');
+  const affectedCourseIds = [...new Set(reviews.map((r) => r.course.toString()))];
+
+  await Enrollment.deleteMany({ user: id });
+  await Review.deleteMany({ user: id });
+  await user.deleteOne();
+
+  // Ratings are cached on Course for fast display — recompute the ones this
+  // user's now-deleted reviews contributed to, so the average stays accurate.
+  await Promise.all(affectedCourseIds.map((courseId) => recomputeCourseRating(courseId)));
+
+  res.json({ message: 'User deleted' });
+});
+
 module.exports = {
   getAllUsers,
   getAllEnrollments,
   getPendingEnrollments,
   approveEnrollment,
   rejectEnrollment,
-  getExamResults
+  getExamResults,
+  deleteUser
 };

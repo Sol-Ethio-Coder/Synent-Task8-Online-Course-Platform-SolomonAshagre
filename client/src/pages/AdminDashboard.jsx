@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api/axios.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const BASE_TABS = ['Analytics', 'Courses', 'Users', 'Enrollments', 'Exam Results', 'Tutoring Photos'];
 
 export default function AdminDashboard() {
+  const { user: currentUser } = useAuth();
   const [tab, setTab] = useState('Analytics');
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
@@ -19,6 +21,7 @@ export default function AdminDashboard() {
   const [addingImage, setAddingImage] = useState(false);
   const [imageError, setImageError] = useState('');
   const [reviewingId, setReviewingId] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
@@ -50,6 +53,25 @@ export default function AdminDashboard() {
     if (!confirm('Delete this course? This cannot be undone.')) return;
     await api.delete(`/admin/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c._id !== id));
+  };
+
+  const handleDeleteUser = async (u) => {
+    if (
+      !confirm(
+        `Delete ${u.name} (${u.email})? This also removes their enrollments and reviews. This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    setDeletingUserId(u._id);
+    try {
+      await api.delete(`/admin/users/${u._id}`);
+      setUsers((prev) => prev.filter((x) => x._id !== u._id));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not delete this user.');
+    } finally {
+      setDeletingUserId(null);
+    }
   };
 
   const handleAddImage = async (e) => {
@@ -255,17 +277,36 @@ export default function AdminDashboard() {
                     <th className="py-3 pr-4">Email</th>
                     <th className="py-3 pr-4">Role</th>
                     <th className="py-3 pr-4">Verified</th>
+                    <th className="py-3 pr-4"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
-                    <tr key={u._id} className="border-b border-forest-50">
-                      <td className="py-3 pr-4 font-medium text-ink">{u.name}</td>
-                      <td className="py-3 pr-4 text-ink/60">{u.email}</td>
-                      <td className="py-3 pr-4 text-ink/60 capitalize">{u.role}</td>
-                      <td className="py-3 pr-4 text-ink/60">{u.isEmailVerified ? 'Yes' : 'No'}</td>
-                    </tr>
-                  ))}
+                  {users.map((u) => {
+                    const isSelf = currentUser && u._id === currentUser._id;
+                    return (
+                      <tr key={u._id} className="border-b border-forest-50">
+                        <td className="py-3 pr-4 font-medium text-ink">{u.name}</td>
+                        <td className="py-3 pr-4 text-ink/60">{u.email}</td>
+                        <td className="py-3 pr-4 text-ink/60 capitalize">{u.role}</td>
+                        <td className="py-3 pr-4 text-ink/60">{u.isEmailVerified ? 'Yes' : 'No'}</td>
+                        <td className="py-3 pr-4">
+                          {isSelf ? (
+                            <span className="text-xs text-ink/30" title="You can't delete your own account">—</span>
+                          ) : (
+                            <motion.button
+                              onClick={() => handleDeleteUser(u)}
+                              disabled={deletingUserId === u._id}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="text-red-600 hover:underline disabled:opacity-50"
+                            >
+                              {deletingUserId === u._id ? 'Deleting...' : 'Delete'}
+                            </motion.button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
