@@ -50,4 +50,4 @@ const submitReview = asyncHandler(async (req, res) => {
   res.status(201).json(review);
 });
 
-module.exports = { getReviews, submitReview };
+module.exports = { getReviews, submitReview, recomputeCourseRating };
